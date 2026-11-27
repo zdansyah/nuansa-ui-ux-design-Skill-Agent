@@ -14,9 +14,10 @@ halaman login, tool satu fungsi, dan web app mobile/PWA.
 Skill ini menjaga **logika**: rapi, sejajar, sedikit teks, hierarki jelas, aksesibel,
 responsive. **Tampilannya bebas dan kreatif**, mengikuti brand dan karakter masing-masing
 web. "Nuansa" hanya contoh standar kualitas, bukan template yang ditiru. Buktinya, halaman
-yang sama (HTML identik) bisa tampil dengan wajah yang sama sekali berbeda:
+yang sama (HTML identik) dalam 6 gaya warna: solid, pastel, senada, dua warna,
+hitam-putih + logo, dan gelap. Semuanya lolos uji kontras WCAG AA:
 
-![Satu halaman empat wajah](docs/screenshots/satu-halaman-empat-wajah.jpg)
+![Satu halaman enam gaya warna](docs/screenshots/enam-gaya-warna.jpg)
 
 ## Isi
 
