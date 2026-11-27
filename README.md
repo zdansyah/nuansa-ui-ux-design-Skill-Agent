@@ -15,7 +15,9 @@ nuansa-ui-ux-design/
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
 │   ├── components.md            # Button, form, card, table responsif, modal, toast, chip pill, stat, dll.
 │   ├── admin-panel.md           # Layout sidebar/topbar, grup menu, dashboard bento, tabel, filter
-│   ├── style-presets.md         # 4 gaya: Clean Pro, Soft Bento, Mono + Accent (lime), Status Pastel
+│   ├── style-presets.md         # 6 gaya: Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass
+│   ├── layout-system.md         # Logika tata letak rapi: grid, garis sejajar, split header, ritme spacing, anatomi kartu
+│   ├── landing-page.md          # Formula landing page: hero, stat strip, langkah, bento fitur + mini-demo, CTA, copywriting
 │   ├── mobile-app.md            # Bottom nav, app bar, bottom sheet, onboarding, safe area
 │   └── theming.md               # Ganti warna seluruh web dari satu tempat + mode gelap
 ├── assets/
@@ -24,7 +26,8 @@ nuansa-ui-ux-design/
 ├── scripts/
 │   ├── find_native_dialogs.py   # Cari semua alert/confirm/prompt di project
 │   ├── style_audit.py           # Ukur kekacauan styling (warna, font-size, inline style, !important)
-│   └── responsive_check.js      # Screenshot 4 ukuran layar + deteksi overflow/tabrakan/teks terpotong
+│   ├── responsive_check.js      # Screenshot 4 ukuran layar + deteksi overflow/tabrakan/teks terpotong/meleset 2–6px
+│   └── extract_design.js        # Pelajari design system web referensi dari URL-nya
 └── evals/                       # Test case (format `claude plugin eval`)
 ```
 
@@ -49,6 +52,8 @@ web bisa diganti".
 - **Tema bisa diatur**: `Theme.apply({ primary: '#d4ff3a', mode: 'dark', radius: 'round' })`, dengan
   warna hover/soft/teks yang aman kontras dihitung otomatis.
 - **Tanpa dialog bawaan browser**: `UI.confirm()` berbasis Promise + atribut `data-confirm` untuk link/form server-side.
+- **Belajar dari web referensi**: `extract_design.js --url https://...` mengukur font, skala tipografi, palet, radius, tombol, urutan section, dan grid.
+- **Tata letak rapi yang terukur**: aturan grid dan garis sejajar, plus deteksi elemen yang meleset 2–6px dari garis sejajarnya.
 - **Verifikasi otomatis**: cek overflow, elemen bertabrakan, teks terpotong, touch target kecil di 375/768/1280/1440px.
 
 ## Uji cepat script

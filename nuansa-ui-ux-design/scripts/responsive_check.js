@@ -23,6 +23,7 @@
  *   - overlapping interactive elements (buttons/links/inputs covering each other)
  *   - clipped text (overflow hidden without ellipsis)
  *   - touch targets smaller than 32px on widths <= 480
+ *   - near-miss alignment on widths >= 1024 (edges 2–6px off a shared alignment line)
  *   - native alert/confirm/prompt dialogs fired during load (auto-dismissed)
  *   - uncaught page errors
  * Exit code 1 when any issue is found.
@@ -151,6 +152,42 @@ function inspect() {
       if (r.width < 32 || r.height < 32) out.smallTargets.push({ el: describe(el), w: Math.round(r.width), h: Math.round(r.height) });
     }
   }
+  // Near-miss alignment (desktop widths): edges 1–6px away from a shared alignment line look like mistakes.
+  out.misaligned = [];
+  if (vw >= 1024) {
+    const cands = [...document.querySelectorAll('h1, h2, h3, h4, p, img, video, button, a, input, select, textarea, li, article, section > div, [class*="card"]')]
+      .filter((el) => {
+        if (!visible(el)) return false;
+        const cs = getComputedStyle(el);
+        if (cs.position === 'fixed' || cs.position === 'absolute') return false;
+        if (/^(H\d|P|LI)$/.test(el.tagName) && (cs.textAlign === 'center' || cs.textAlign === 'right')) return false;
+        if (el.tagName === 'A' && cs.display === 'inline') return false;
+        const r = el.getBoundingClientRect();
+        return r.width >= 40 && r.width < vw - 2 && r.top < document.documentElement.scrollHeight;
+      }).slice(0, 1500);
+    const check = (edgeOf, label) => {
+      const lines = new Map();
+      for (const el of cands) {
+        const x = Math.round(edgeOf(el.getBoundingClientRect()));
+        if (!lines.has(x)) lines.set(x, []);
+        lines.get(x).push(el);
+      }
+      for (const [x, els] of lines) {
+        for (const [y, ref] of lines) {
+          const d = Math.abs(x - y);
+          // 1px differences are usually borders/subpixel rounding, so start at 2px.
+          if (d >= 2 && d <= 6 && ref.length >= 3 && ref.length > els.length) {
+            out.misaligned.push({ edge: label, x, line: y, off: d, lineCount: ref.length, el: describe(els[0]), count: els.length });
+            break;
+          }
+        }
+      }
+    };
+    check((r) => r.left, 'left');
+    check((r) => r.right, 'right');
+    out.alignmentLines = [...new Set(cands.map((el) => Math.round(el.getBoundingClientRect().left)))].length;
+  }
+  out.misaligned = out.misaligned.sort((a, b) => b.lineCount - a.lineCount).slice(0, 15);
   out.overlaps = out.overlaps.slice(0, 30);
   out.clipped = out.clipped.slice(0, 30);
   out.smallTargets = out.smallTargets.slice(0, 30);
@@ -197,7 +234,7 @@ function inspect() {
       const shot = path.join(args.out, `${slug(url)}-${width}.png`);
       await page.screenshot({ path: shot, fullPage: args.fullPage }).catch(() => {});
       const entry = { url, width, status, screenshot: shot, ...result, nativeDialogs: dialogs, pageErrors: errors };
-      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + dialogs.length + errors.length;
+      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + (result.misaligned || []).length + dialogs.length + errors.length;
       entry.issueCount = count;
       issues += count;
       report.push(entry);
@@ -212,6 +249,8 @@ function inspect() {
       result.overlaps.slice(0, 8).forEach((o) => console.log(`    overlap: ${o.a}  ⟷  ${o.b}  (${o.area}px²)`));
       result.clipped.slice(0, 8).forEach((o) => console.log(`    clipped text (${o.axis}): ${o.el}`));
       result.smallTargets.slice(0, 8).forEach((o) => console.log(`    small touch target ${o.w}×${o.h}: ${o.el}`));
+      (result.misaligned || []).slice(0, 8).forEach((o) => console.log(`    near-miss ${o.edge} edge: ${o.el} at x=${o.x} is ${o.off}px off the x=${o.line} line shared by ${o.lineCount} elements`));
+      if (result.alignmentLines) console.log(`    (info) distinct left edges: ${result.alignmentLines} — fewer = tidier`);
       dialogs.forEach((d) => console.log(`    native dialog fired → ${d}`));
       errors.forEach((e) => console.log(`    page error: ${e}`));
     }

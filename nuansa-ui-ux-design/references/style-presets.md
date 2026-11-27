@@ -11,6 +11,9 @@ token change.
 - Preset 2 — Soft Bento (dashboards, SaaS)
 - Preset 3 — Mono + Accent (bold, Gen-Z, mobile-first; e.g. black + lime)
 - Preset 4 — Status Pastel (task/application tracking, utility apps)
+- Preset 5 — Editorial Neutral (product sites, corporate, landing pages)
+- Preset 6 — Soft Glass (fintech, wellness, consumer apps, hero dashboards)
+- Learning from a live reference URL
 - Shared "modern" signals across all presets
 - What makes a UI look dated (avoid)
 - Dribbble-to-production adjustments
@@ -144,6 +147,90 @@ Best for: request/application tracking, ticketing, task lists, government/servic
   badge + time on top line, title, chevron right. Same component, two layouts.
 - Filter chips row under the title (All / Active / Completed), active = dark fill.
 - Relative time ("2 min ago") muted and right-aligned in list view.
+
+## Preset 5 — Editorial Neutral (reference: modern Indonesian product sites, corporate logistics site)
+
+Best for: product/landing pages, SaaS marketing, corporate sites, public pages of an app.
+Full section patterns are in `landing-page.md`; grid rules in `layout-system.md`.
+
+```css
+:root {
+  --font-sans: "Plus Jakarta Sans", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #fafafa;            /* or warm #fafaf8 */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f5f5; /* warm: #f2f2ef */
+  --color-border: #e5e5e5;        /* hairlines carry the structure */
+  --color-text: #111111;
+  --color-text-muted: #555555;
+  --color-text-subtle: #888888;
+  --color-ink: #111111;           /* primary buttons */
+  --color-primary: #fe2c55;       /* ONE signature accent: labels/highlights (or lime #c5f82d as fill) */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-control: 9999px; /* or 8px for a crisper feel */
+  --fs-display: clamp(2.5rem, 6vw, 4.5rem); --ls-display: -0.035em; --lh-tight: 1.02;
+}
+```
+
+Signature rules:
+- Huge display headline with heavy weight (650–800) and tight tracking; two-tone
+  (ink + gray) or a highlighter block in the accent.
+- An eyebrow pill above the hero headline; uppercase accent eyebrows above section titles.
+- Hairline-bordered white cards on a near-white canvas; shadows only on floating mockups.
+- The product shown as the hero visual (phone/dashboard mockup or an interactive tool).
+- Split header formula (heading 7 cols / text 5 cols) for corporate sections; centered
+  header formula for product sections.
+- A theme toggle in the navbar. Dark mode is expected.
+
+## Preset 6 — Soft Glass (reference: crypto/stake app, logistics hero dashboard, insurance app, wellness app)
+
+Best for: consumer fintech, wellness, insurance/health apps, "hero" dashboards with a
+central object. Use sparingly in dense admin screens.
+
+```css
+:root {
+  --color-bg: #eef1f6;
+  --glass: rgb(255 255 255 / .55);
+  --glass-strong: rgb(255 255 255 / .8);
+  --glass-border: rgb(255 255 255 / .7);
+  --radius-md: 24px; --radius-lg: 32px; --radius-control: 9999px;
+}
+.glass { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+  backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .6) inset, 0 12px 32px rgb(15 23 42 / .08); }
+.page-glow { background:
+  radial-gradient(40% 35% at 15% 10%, rgb(147 197 253 / .45), transparent 70%),
+  radial-gradient(35% 30% at 85% 30%, rgb(253 224 71 / .35), transparent 70%), var(--color-bg); }
+@supports not (backdrop-filter: blur(1px)) { .glass { background: var(--glass-strong); } }
+```
+
+Signature rules:
+- Soft color blobs behind (2 hues max, low saturation). Frosted cards float above them.
+- Big numbers ($17,340) with small **delta pills** (+0.60%) in a warm accent.
+- **Notch labels**: a small white pill sitting on a card's edge ("Your History",
+  "Daily Expenses") instead of a full card header.
+- A central hero object (product image, vehicle, mascot) with floating glass widgets
+  around it (KPI, gauge, mini chart).
+- Image cards with a dark gradient overlay at the bottom and white title + tag pill on top.
+- Mesh/gradient hero cards (orange→red) for the one card that matters most (e-card,
+  welcome card); everything else stays neutral.
+- Serif display headings + pastel tints for wellness/emotional products.
+- Guardrails: test text contrast **on the busiest part** of the blurred background; keep
+  body text on solid or strong glass; limit blur layers (each one costs GPU on low-end
+  phones); respect `prefers-reduced-transparency` where supported by falling back to
+  `--glass-strong`.
+
+## Learning from a live reference URL
+
+If the user gives URLs of sites they like:
+1. Run `node scripts/extract_design.js --url <url> --out <dir>`. It saves desktop + mobile
+   screenshots and a `-design.md` summary: fonts, type scale with tracking, palette by
+   usage, radius, shadows, button styles, section order with grid columns, container
+   width, `:root` CSS variables, dark-mode support, tech stack.
+2. Look at the screenshots yourself; the numbers explain *how*, the screenshots show *what*.
+3. Write the reference style spec (format above) and pick or blend a preset.
+4. Map to tokens and components. Borrow the system (scale, rhythm, shapes, section
+   formulas), never the content, brand, logo or imagery.
+5. If the sandbox can't reach the URL (network policy), ask for screenshots instead, or
+   ask the user to allow the host.
 
 ## Shared "modern" signals across all presets
 

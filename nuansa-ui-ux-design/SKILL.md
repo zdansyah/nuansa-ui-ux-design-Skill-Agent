@@ -1,6 +1,6 @@
 ---
 name: nuansa-ui-ux-design
-description: Audit, redesign and tidy up the UI/UX of an existing website or web app (landing pages, dashboards, admin panels, mobile web) into a modern, minimalist, clean, professional look that is fully responsive and easy to re-theme, while keeping every feature and workflow working. Use this skill whenever the user asks to redesign, restyle, "rapikan", "perbaiki tampilan", modernize, declutter, or make a site look premium/professional/not outdated ("tidak jadul"); fix layout, spacing, alignment, responsive/mobile issues, overflow or overlapping elements; clean up an admin panel or dashboard; standardize buttons, forms, tables, cards, modals; replace browser alert()/confirm()/prompt() with custom modals and toasts; make a UI look like reference screenshots or Dribbble shots; or let the site's colors/theme/dark mode be set from one place ("bisa ganti warna", theme switcher) — even if they mention only one page or component, and even when the request is written in Indonesian.
+description: Audit, redesign and tidy the UI/UX of a website or web app (landing pages, dashboards, admin panels, mobile web) into a modern, minimalist, clean, responsive, easily re-themed design while keeping every feature working. Use this skill whenever the user asks to redesign, restyle, "rapikan", "perbaiki tampilan", modernize, declutter, or make a site look premium/professional/not outdated ("tidak jadul"); fix layout, spacing, alignment, responsive/mobile issues, overflow or overlapping elements; clean up an admin panel or dashboard; standardize buttons, forms, tables, cards, modals; replace browser alert()/confirm()/prompt() with custom modals and toasts; make a UI look like reference screenshots, Dribbble shots or a reference website URL; build or tidy a landing/product page; or let the site's colors/theme/dark mode be set from one place ("bisa ganti warna", theme switcher) — even for one page or component, and even when written in Indonesian.
 ---
 
 # Nuansa UI/UX Design
@@ -33,6 +33,10 @@ changes cheap (one token or one component changes, not fifty files).
 - **Reusable components, not page-specific styling.** Buttons, inputs, cards, tables,
   modals, toasts and badges are built once with variants. Pages compose them. This is
   what makes "easy to change later" true.
+- **Tidy = few alignment lines + fixed gaps.** Layouts feel "rapi" when the header,
+  content and footer share one container and grid, edges line up exactly, and each
+  relationship (inside a group, between groups, between sections) always uses the same
+  gap. See `references/layout-system.md`.
 - **Mobile is a layout, not an afterthought.** Design for the narrowest screen first,
   then let the layout expand. Nothing should overflow horizontally, overlap, or require
   pinch-zoom at 360px.
@@ -87,7 +91,11 @@ check whether a shared component or token change is the right fix.
 reference images. If the user shared reference images/screenshots, write a short
 "reference style spec" first (colors, radius, type scale, density, signature components)
 as described there, and map it to tokens — borrow the visual language, keep the app's
-own features and information architecture.
+own features and information architecture. If the user gave **reference URLs**, run
+`node <skill>/scripts/extract_design.js --url <url> --out <dir>` for each one and look at
+the screenshots it saves; it measures fonts, type scale and tracking, palette, radius,
+buttons, section order, grid columns and container width. If the host is unreachable,
+ask for screenshots instead.
 
 Ask the user only about things that are genuinely theirs to decide and that you can't
 infer: brand color/logo if none exists, whether a piece of content is really safe to
@@ -131,7 +139,11 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
 
 ### Phase 4 — Redesign layouts and pages
 
-1. **Layouts first.** Public site: header/nav, footer, content container. Admin panel:
+1. **Layouts first.** Read `references/layout-system.md` (grid, alignment lines, split
+   header formula, spacing rhythm, card anatomy). Public site: header/nav, footer,
+   content container, using the same container for header and content. Landing or
+   product pages: follow the section formula and hero/feature patterns in
+   `references/landing-page.md`. Admin panel:
    read `references/admin-panel.md` for sidebar + topbar layout, menu grouping, page
    header pattern, data tables, filters and forms. Mobile layouts and app-like UIs
    (bottom nav, app bar, sheets, onboarding): read `references/mobile-app.md`.
@@ -153,7 +165,8 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    `node <skill>/scripts/responsive_check.js --url <base-url> --paths / /admin ...`
    (run with `--help` for options). It screenshots each page at mobile (375), tablet
    (768), laptop (1280) and desktop (1440) widths and reports horizontal overflow,
-   elements wider than the viewport, and overlapping interactive elements. Fix every
+   elements wider than the viewport, overlapping interactive elements, clipped text,
+   small touch targets, and near-miss alignments (edges 2–6px off a shared line). Fix every
    finding, then re-run until clean. Look at the screenshots yourself — the script
    catches mechanical problems, not ugliness.
 2. **Native dialogs gone.** Re-run `find_native_dialogs.py`; it should report zero calls
@@ -233,11 +246,14 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `references/design-tokens.md` — token templates for plain CSS, Tailwind and Bootstrap/Sass, plus dark mode. Read in Phase 3.
 - `references/components.md` — specs and markup patterns for every core component, including responsive tables. Read in Phase 3.
 - `references/admin-panel.md` — admin/dashboard layout, menu grouping, bento dashboards, tables, filters, forms. Read when an admin panel or dashboard is in scope.
-- `references/style-presets.md` — 4 visual directions with token overrides, how to extract a style spec from reference images, dated patterns to avoid. Read in Phase 2.
+- `references/style-presets.md` — 6 visual directions (Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass) with token overrides, how to extract a style spec from reference images or URLs, dated patterns to avoid. Read in Phase 2.
+- `references/layout-system.md` — the rules behind a tidy layout: grid, alignment lines, split header, spacing rhythm, card anatomy, dashboard grids, numbers, responsive collapse. Read in Phase 4.
+- `references/landing-page.md` — product/landing page formula: navbar, hero variants, stat strip, steps, bento features with live mini-demos, pricing/transparency, CTA band, footer, typography/color recipes, Indonesian copywriting. Read for public/marketing pages.
 - `references/mobile-app.md` — safe areas, thumb zone, app bar, bottom nav, sheets, onboarding. Read when mobile/app-like UI is in scope.
 - `references/theming.md` — site-wide / per-user color, dark mode, corner and density switching. Read when colors should be settable.
 - `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert with `data-confirm` support.
 - `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
 - `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
-- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/native-dialog detection.
+- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/native-dialog detection.
+- `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).
