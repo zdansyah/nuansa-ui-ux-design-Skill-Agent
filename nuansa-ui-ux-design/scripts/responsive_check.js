@@ -18,6 +18,10 @@
  *   --storage <file>     Playwright storageState JSON (logged-in session).
  *   --no-full-page       Viewport-only screenshots.
  *   --no-text            Report the text budget as info only (for content-heavy pages).
+ *   --no-a11y            Skip the axe-core accessibility audit.
+ *   --no-perf            Skip performance metrics.
+ *   --slow               Throttle CPU/network for the performance pass.
+ *   --stress             Add a stress-test pass per width (long text, big numbers).
  *
  * Detects, per page and width:
  *   - horizontal page overflow (document wider than viewport) and the elements causing it
@@ -28,6 +32,16 @@
  *   - text budget: words in the first viewport (> 80 on phones = too wordy; aim ≤ 60), paragraphs over
  *     30 words, buttons over 3 words, headings over 10 words. Long-form content inside
  *     <article>, [data-long-text], .prose, tables or code is exempt. Disable with --no-text.
+ *   - accessibility (WCAG 2.2 A/AA via axe-core, once per page): contrast, missing labels/alt,
+ *     heading order, ARIA misuse, focusable hidden elements… Needs `npm i -D axe-core`
+ *     (looked up from the project, the script folder, or global modules); skipped with a
+ *     hint if missing. Disable with --no-a11y.
+ *   - performance (once per page, at the first width): LCP, CLS, total blocking time,
+ *     page weight by type, oversized/unsized/eager offscreen images, web fonts.
+ *     Add --slow to emulate a mid-range phone on 4G (4× CPU, ~1.6 Mbps). Disable with --no-perf.
+ *   - stress test (--stress): doubles every text, inserts long unbroken words and huge
+ *     numbers, fills inputs, then re-checks overflow/overlap/clipping and saves *-stress.png.
+ *     Real content is longer than mock content; this finds what breaks.
  *   - native alert/confirm/prompt dialogs fired during load (auto-dismissed)
  *   - uncaught page errors
  * Exit code 1 when any issue is found.
@@ -44,7 +58,7 @@ try {
 }
 
 function parseArgs(argv) {
-  const a = { paths: [], widths: [375, 768, 1280, 1440], height: 900, out: 'responsive-report', wait: 500, cookies: [], fullPage: true, text: true };
+  const a = { paths: [], widths: [375, 768, 1280, 1440], height: 900, out: 'responsive-report', wait: 500, cookies: [], fullPage: true, text: true, a11y: true, perf: true, slow: false, stress: false };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     const next = () => argv[++i];
@@ -58,9 +72,80 @@ function parseArgs(argv) {
     else if (k === '--storage') a.storage = next();
     else if (k === '--no-full-page') a.fullPage = false;
     else if (k === '--no-text') a.text = false;
+    else if (k === '--no-a11y') a.a11y = false;
+    else if (k === '--no-perf') a.perf = false;
+    else if (k === '--slow') a.slow = true;
+    else if (k === '--stress') a.stress = true;
     else if (k === '--help' || k === '-h') a.help = true;
   }
   return a;
+}
+
+function findAxe() {
+  const bases = [process.cwd(), __dirname, path.join(__dirname, '..'), ...(process.env.NODE_PATH || '').split(path.delimiter).filter(Boolean)];
+  for (const b of bases) {
+    try { return require.resolve('axe-core/axe.min.js', { paths: [b] }); } catch (e) { /* try next */ }
+  }
+  return null;
+}
+
+// Installed before navigation so buffered metrics are captured from the first paint.
+function perfInit() {
+  window.__perf = { lcp: 0, cls: 0, tbt: 0, longTasks: 0 };
+  try {
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__perf.lcp = Math.max(window.__perf.lcp, e.renderTime || e.loadTime || e.startTime); }).observe({ type: 'largest-contentful-paint', buffered: true });
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__perf.cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) { window.__perf.longTasks++; window.__perf.tbt += Math.max(0, e.duration - 50); } }).observe({ type: 'longtask', buffered: true });
+  } catch (e) { /* older engines */ }
+}
+
+function collectPerf() {
+  const nav = performance.getEntriesByType('navigation')[0] || {};
+  const res = performance.getEntriesByType('resource');
+  const byType = {};
+  let total = nav.transferSize || 0;
+  for (const r of res) {
+    const t = r.initiatorType === 'link' && /\.css(\?|$)/.test(r.name) ? 'css' : r.initiatorType === 'img' || /\.(png|jpe?g|gif|webp|avif|svg)(\?|$)/i.test(r.name) ? 'img' : /\.(woff2?|ttf|otf)(\?|$)/i.test(r.name) ? 'font' : r.initiatorType === 'script' ? 'js' : 'other';
+    byType[t] = (byType[t] || 0) + (r.transferSize || r.encodedBodySize || 0);
+    total += r.transferSize || r.encodedBodySize || 0;
+  }
+  const vh = window.innerHeight;
+  const imgs = [...document.images].filter((i) => i.complete && i.naturalWidth > 0);
+  const oversized = [], unsized = [], eagerOffscreen = [];
+  for (const i of imgs) {
+    const r = i.getBoundingClientRect();
+    const src = (i.currentSrc || i.src).split('/').pop().slice(0, 50);
+    if (r.width > 0 && i.naturalWidth > r.width * devicePixelRatio * 2 && i.naturalWidth > 400) oversized.push(`${src} (${i.naturalWidth}px shown at ${Math.round(r.width)}px)`);
+    if (!i.getAttribute('width') && !i.getAttribute('height') && !getComputedStyle(i).aspectRatio.includes('/') && getComputedStyle(i).height === 'auto') unsized.push(src);
+    if (r.top > vh * 1.5 && i.loading !== 'lazy') eagerOffscreen.push(src);
+  }
+  const fonts = [...new Set([...document.fonts].filter((f) => f.status === 'loaded').map((f) => `${f.family.replace(/["']/g, '')} ${f.weight}`))];
+  return {
+    ttfb: Math.round(nav.responseStart || 0), domContentLoaded: Math.round(nav.domContentLoadedEventEnd || 0), load: Math.round(nav.loadEventEnd || 0),
+    lcp: Math.round(window.__perf ? window.__perf.lcp : 0), cls: Number((window.__perf ? window.__perf.cls : 0).toFixed(3)), tbt: Math.round(window.__perf ? window.__perf.tbt : 0),
+    requests: res.length + 1, totalKB: Math.round(total / 1024), byTypeKB: Object.fromEntries(Object.entries(byType).map(([k, v]) => [k, Math.round(v / 1024)])),
+    oversizedImages: oversized.slice(0, 10), unsizedImages: unsized.slice(0, 10), eagerOffscreenImages: eagerOffscreen.slice(0, 10), webFonts: fonts,
+  };
+}
+
+// Replace content with realistic worst cases: longer labels, unbroken tokens, huge numbers.
+function stressify() {
+  const LONG = 'Pengembangan_Infrastruktur_Digital@perusahaan-contoh-panjang.co.id';
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  for (let t = walker.nextNode(); t; t = walker.nextNode()) nodes.push(t);
+  let n = 0;
+  for (const t of nodes) {
+    const p = t.parentElement;
+    if (!p || /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|OPTION|TITLE)$/.test(p.tagName) || !t.textContent.trim()) continue;
+    if (++n > 800) break;
+    const s = t.textContent;
+    if (/\d/.test(s) && /^[\s\d.,:%+\-\/Rp$€£¥kKmMjtJT]*$/.test(s)) { t.textContent = s.replace(/\d[\d.,]*/g, '9.999.999.999'); continue; }
+    const words = s.trim().split(/\s+/).length;
+    t.textContent = words <= 4 ? `${s} ${s.trim()}${n % 4 === 0 ? ' ' + LONG : ''}` : `${s} ${s.trim()}`;
+  }
+  document.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=number]):not([type=date]), textarea').forEach((i) => { try { i.value = `${LONG} ${LONG}`; } catch (e) { /* ignore */ } });
+  return n;
 }
 
 function slug(s) {
@@ -248,7 +333,8 @@ function inspect() {
   const targets = args.paths.length ? args.paths.map((p) => new URL(p, args.url.endsWith('/') ? args.url : args.url + '/').href) : [args.url];
 
   const browser = await chromium.launch();
-  const context = await browser.newContext(args.storage ? { storageState: args.storage } : {});
+  // bypassCSP lets the axe-core audit script run on sites with a strict Content-Security-Policy (testing only).
+  const context = await browser.newContext({ bypassCSP: true, ...(args.storage ? { storageState: args.storage } : {}) });
   if (args.cookies.length) {
     const u = new URL(targets[0]);
     if (u.protocol.startsWith('http')) {
@@ -258,10 +344,23 @@ function inspect() {
 
   const report = [];
   let issues = 0;
+  const axePath = args.a11y ? findAxe() : null;
+  if (args.a11y && !axePath) console.log('(a11y skipped: install axe-core with `npm i -D axe-core` to enable the WCAG audit)\n');
   for (const url of targets) {
-    for (const width of args.widths) {
+    for (const [wi, width] of args.widths.entries()) {
+      const firstWidth = wi === 0;
       const page = await context.newPage();
       await page.setViewportSize({ width, height: args.height });
+      const doPerf = args.perf && firstWidth;
+      if (doPerf) {
+        await page.addInitScript(perfInit);
+        if (args.slow) {
+          const cdp = await context.newCDPSession(page);
+          await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+          await cdp.send('Network.enable');
+          await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 150, downloadThroughput: 1.6 * 1024 * 1024 / 8, uploadThroughput: 750 * 1024 / 8 });
+        }
+      }
       const dialogs = [], errors = [];
       page.on('dialog', (d) => { dialogs.push(`${d.type()}: ${d.message()}`); d.dismiss().catch(() => {}); });
       page.on('pageerror', (e) => errors.push(String(e.message || e)));
@@ -277,11 +376,57 @@ function inspect() {
       try { result = await page.evaluate(inspect); } catch (e) { errors.push('inspect: ' + e.message); }
       const shot = path.join(args.out, `${slug(url)}-${width}.png`);
       await page.screenshot({ path: shot, fullPage: args.fullPage }).catch(() => {});
-      const entry = { url, width, status, screenshot: shot, ...result, nativeDialogs: dialogs, pageErrors: errors };
+      // Performance (first width only).
+      let perf = null, perfIssues = [];
+      if (doPerf) {
+        try {
+          await page.waitForTimeout(300);
+          perf = await page.evaluate(collectPerf);
+          if (perf.lcp > 2500) perfIssues.push(`LCP ${perf.lcp}ms (budget 2500ms) — optimize the hero image/font, preload it, reduce render-blocking CSS/JS`);
+          if (perf.cls > 0.1) perfIssues.push(`CLS ${perf.cls} (budget 0.1) — give images/embeds width+height or aspect-ratio, reserve space for late content`);
+          if (perf.tbt > 300) perfIssues.push(`blocking time ${perf.tbt}ms (budget 300ms) — split/defer JavaScript`);
+          if (perf.oversizedImages.length) perfIssues.push(`${perf.oversizedImages.length} oversized image(s), e.g. ${perf.oversizedImages[0]} — serve responsive sizes (srcset) in WebP/AVIF`);
+          if (perf.unsizedImages.length) perfIssues.push(`${perf.unsizedImages.length} image(s) without width/height (layout shift risk), e.g. ${perf.unsizedImages[0]}`);
+          if (perf.eagerOffscreenImages.length) perfIssues.push(`${perf.eagerOffscreenImages.length} offscreen image(s) not lazy-loaded — add loading="lazy"`);
+          if (perf.webFonts.length > 6) perfIssues.push(`${perf.webFonts.length} web font files/weights loaded — keep to ≤ 4`);
+        } catch (e) { errors.push('perf: ' + e.message); }
+      }
+
+      // Accessibility (first width only).
+      let a11y = null;
+      if (axePath && firstWidth) {
+        try {
+          await page.addScriptTag({ path: axePath });
+          a11y = await page.evaluate(async () => {
+            const r = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] }, resultTypes: ['violations'] });
+            return r.violations.map((v) => ({
+              id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length, helpUrl: v.helpUrl,
+              wcag: v.tags.some((t) => /^wcag\d/.test(t)), example: v.nodes[0] ? v.nodes[0].target.join(' ').slice(0, 90) : '',
+            }));
+          });
+        } catch (e) { errors.push('a11y: ' + e.message.split('\n')[0]); }
+      }
+      const a11yIssues = (a11y || []).filter((v) => v.wcag);
+
+      // Stress pass.
+      let stress = null;
+      if (args.stress) {
+        try {
+          await page.evaluate(stressify);
+          await page.waitForTimeout(250);
+          const sr = await page.evaluate(inspect);
+          const sshot = path.join(args.out, `${slug(url)}-${width}-stress.png`);
+          await page.screenshot({ path: sshot, fullPage: args.fullPage }).catch(() => {});
+          stress = { screenshot: sshot, overflowPx: sr.overflowPx, overflowing: sr.overflowing.slice(0, 8), overlaps: sr.overlaps.slice(0, 8), clipped: sr.clipped.slice(0, 8) };
+        } catch (e) { errors.push('stress: ' + e.message.split('\n')[0]); }
+      }
+      const stressCount = stress ? (stress.overflowPx > 0 ? 1 : 0) + stress.overlaps.length + stress.clipped.length : 0;
+
+      const entry = { url, width, status, screenshot: shot, ...result, perf, perfIssues, a11y, stress, nativeDialogs: dialogs, pageErrors: errors };
       const t = result.text || { longParagraphs: [], longButtons: [], longHeadings: [] };
       const overBudget = t.viewportBudget && t.firstViewportWords > t.viewportBudget;
       const textIssues = args.text ? (overBudget ? 1 : 0) + t.longParagraphs.length + t.longButtons.length + t.longHeadings.length : 0;
-      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + (result.misaligned || []).length + textIssues + dialogs.length + errors.length;
+      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + (result.misaligned || []).length + textIssues + perfIssues.length + a11yIssues.length + stressCount + dialogs.length + errors.length;
       entry.issueCount = count;
       issues += count;
       report.push(entry);
@@ -304,6 +449,20 @@ function inspect() {
       t.longParagraphs.slice(0, 6).forEach((o) => console.log(`    ${tag}long paragraph (${o.words} words, budget 30): ${o.el}`));
       t.longButtons.slice(0, 6).forEach((o) => console.log(`    ${tag}long button label (${o.words} words, budget 3): ${o.el}`));
       t.longHeadings.slice(0, 6).forEach((o) => console.log(`    ${tag}long heading (${o.words} words, budget 10): ${o.el}`));
+      if (perf) console.log(`    (perf) LCP ${perf.lcp}ms · CLS ${perf.cls} · TBT ${perf.tbt}ms · ${perf.totalKB}KB in ${perf.requests} requests ${JSON.stringify(perf.byTypeKB)}${args.slow ? ' [throttled]' : ''}`);
+      perfIssues.forEach((m) => console.log(`    perf: ${m}`));
+      if (a11y) {
+        a11yIssues.slice(0, 12).forEach((v) => console.log(`    a11y [${v.impact}] ${v.id}: ${v.help} — ${v.nodes} element(s), e.g. ${v.example}`));
+        const bp = a11y.filter((v) => !v.wcag);
+        if (bp.length) console.log(`    (info) a11y best practices: ${bp.map((v) => v.id).join(', ')}`);
+        if (!a11y.length) console.log('    a11y: no WCAG violations detected (still test keyboard + screen reader manually)');
+      }
+      if (stress) {
+        if (stress.overflowPx > 0) { console.log(`    stress: horizontal overflow +${stress.overflowPx}px with long content`); stress.overflowing.slice(0, 4).forEach((o) => console.log(`      ↳ ${o.el}`)); }
+        stress.overlaps.slice(0, 4).forEach((o) => console.log(`    stress overlap: ${o.a} ⟷ ${o.b}`));
+        stress.clipped.slice(0, 4).forEach((o) => console.log(`    stress clipped (${o.axis}): ${o.el} — wrap, truncate with ellipsis + title, or allow growth`));
+        if (!stressCount) console.log('    stress: layout holds with long text and big numbers');
+      }
       dialogs.forEach((d) => console.log(`    native dialog fired → ${d}`));
       errors.forEach((e) => console.log(`    page error: ${e}`));
     }

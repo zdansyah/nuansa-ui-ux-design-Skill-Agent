@@ -171,6 +171,11 @@ scope — see `theming.md`). Override semantic tokens only:
   --color-primary-soft: rgb(37 99 235 / 0.15);
   --color-primary-text: #93c5fd;
   --color-ink: #f8fafc;              /* ink flips to near-white in dark mode */
+  --color-success-soft: rgb(22 163 74 / 0.16);   /* soft tints must be re-tinted, or badges glow white */
+  --color-warning-soft: rgb(217 119 6 / 0.16);
+  --color-danger-soft:  rgb(220 38 38 / 0.16);
+  --color-info-soft:    rgb(2 132 199 / 0.16);
+  --color-success: #4ade80; --color-warning: #fbbf24; --color-danger: #f87171; --color-info: #38bdf8;
   --color-on-ink: #0b1120;
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.4);
 }

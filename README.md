@@ -15,6 +15,11 @@ halaman login, tool satu fungsi, dan web app mobile/PWA.
 nuansa-ui-ux-design/
 ├── SKILL.md                     # Alur kerja utama (5 fase) + prinsip desain
 ├── references/
+│   ├── ux-flows.md              # Alur & struktur menu dulu: tugas utama, hitung langkah, sitemap, penamaan
+│   ├── heuristics.md            # Evaluasi 10 heuristik Nielsen dengan skor 0–4
+│   ├── states-and-edge-cases.md # Matriks state komponen, empty/error/loading, konten ekstrem
+│   ├── accessibility.md         # WCAG 2.2 AA: cek otomatis + manual 10 menit
+│   ├── performance.md           # Core Web Vitals: LCP, CLS, gambar, font, script
 │   ├── site-types.md            # Panduan per jenis web: halaman, komponen, kadar teks, preset
 │   ├── audit-checklist.md       # Checklist audit per halaman + QA akhir
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
@@ -33,8 +38,10 @@ nuansa-ui-ux-design/
 ├── scripts/
 │   ├── find_native_dialogs.py   # Cari semua alert/confirm/prompt di project
 │   ├── style_audit.py           # Ukur kekacauan styling (warna, font-size, inline style, !important)
-│   ├── responsive_check.js      # Screenshot 4 ukuran layar + deteksi overflow/tabrakan/teks terpotong/meleset 2–6px/kebanyakan teks
-│   └── extract_design.js        # Pelajari design system web referensi dari URL-nya
+│   ├── responsive_check.js      # Screenshot 4 ukuran + overflow/tabrakan/meleset/kebanyakan teks + aksesibilitas (axe) + performa + stress test
+│   ├── extract_design.js        # Pelajari design system web referensi dari URL-nya
+│   ├── before_after.js          # Laporan sebelum/sesudah untuk klien (screenshot berdampingan + skor)
+│   └── make_styleguide.py       # Halaman style guide otomatis dari token + CSS komponen
 └── evals/                       # Test case (format `claude plugin eval`)
 ```
 
@@ -55,6 +62,9 @@ web bisa diganti".
 
 - **Prinsip utama: bersih, rapi, tidak kebanyakan teks.** Informasi dipindah dari kalimat ke angka, chip, badge, ikon,
   dan warna. Jumlah teks diukur otomatis (kata per layar, paragraf, tombol, judul).
+- **UX dulu, baru visual**: tugas utama user, alur dengan jumlah langkah, sitemap, dan evaluasi heuristik Nielsen.
+- **Kualitas terukur**: aksesibilitas WCAG 2.2 (axe-core), performa (LCP/CLS/TBT, `--slow`), stress test konten ekstrem (`--stress`).
+- **Siap diserahkan ke klien**: laporan sebelum/sesudah otomatis dan halaman style guide.
 - **Audit dulu, baru ubah**: inventaris fitur dibuat sebelum redesign agar tidak ada yang hilang.
 - **Design tokens**: satu sumber untuk warna, spacing, radius, dan tipografi.
 - **Gaya dari gambar referensi**: ekstrak spec gaya (warna, radius, tipografi, komponen khas) lalu dipetakan ke token.
@@ -72,5 +82,8 @@ web bisa diganti".
 ```bash
 python nuansa-ui-ux-design/scripts/find_native_dialogs.py path/ke/project
 python nuansa-ui-ux-design/scripts/style_audit.py path/ke/project
-node   nuansa-ui-ux-design/scripts/responsive_check.js --url http://localhost:8000 --paths / /admin
+npm i -D axe-core   # opsional, untuk cek aksesibilitas
+node   nuansa-ui-ux-design/scripts/responsive_check.js --url http://localhost:8000 --paths / /admin --stress --slow
+node   nuansa-ui-ux-design/scripts/before_after.js --before ui-before --after ui-after --out ui-report
+python nuansa-ui-ux-design/scripts/make_styleguide.py --tokens css/tokens.css --css css/components.css --out styleguide.html
 ```

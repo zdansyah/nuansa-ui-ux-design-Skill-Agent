@@ -23,6 +23,9 @@ The one-line test for every decision: **is it clean, tidy, and light on text?**
 ("bersih, rapi, tidak kebanyakan teks"). Modern doesn't mean glass, gradients or 3D;
 those are optional styles. Clean structure with little text is not optional.
 
+- **Path before pixels.** Know the 3–5 top tasks and make them short (≤ 3 steps where
+  possible) before styling anything. A beautiful page on a confusing path still fails.
+  See `references/ux-flows.md`.
 - **Hierarchy over decoration.** A page should have one obvious primary action and a clear
   reading order. Use size, weight, spacing and color contrast — not borders, gradients,
   shadows and icons everywhere — to show what matters.
@@ -96,20 +99,31 @@ skip the audit are the ones that silently delete a form field or break a submit 
      `alert/confirm/prompt` call with file and line.
    - `python <skill>/scripts/style_audit.py <project-root>` — hard-coded colors, font
      sizes, `!important` and inline styles, so you know how fragmented the styling is.
-5. If the app can be run locally, start it and capture "before" screenshots with
-   `node <skill>/scripts/responsive_check.js` (see Phase 5). Keep these for comparison.
+5. If the app can be run locally, start it and capture a baseline with
+   `node <skill>/scripts/responsive_check.js --url <base-url> --paths … --out ui-before`
+   (see Phase 5). The screenshots and `report.json` feed the before/after report at the end.
+   Install `axe-core` (`npm i -D axe-core`) if allowed so the accessibility audit runs too.
 
-### Phase 2 — Audit and plan
+### Phase 2 — UX first, then audit and plan
 
-Read `references/audit-checklist.md` and audit every page against it. Produce a short
-audit (in the conversation, or as `UI-AUDIT.md` if the project is large) with:
+1. **UX brief.** Read `references/ux-flows.md`. Write the top tasks, map each flow with a
+   step count (now → proposed), the sitemap/navigation, naming fixes, and for each key
+   screen "purpose · main element · main action". Flow changes that alter behavior need
+   the user's OK; visual changes don't.
+2. **Heuristic evaluation.** Score the key screens against Nielsen's 10 heuristics with
+   severities 0–4 (`references/heuristics.md`). This catches usability problems the
+   visual checklist misses (no feedback, no undo, jargon, errors that don't help).
+3. **Visual audit.** Read `references/audit-checklist.md` and audit every page against it.
+
+Produce a short audit (in the conversation, or as `UI-AUDIT.md` if the project is large) with:
 
 - **Problems found**, grouped by type (layout, spacing, typography, color, navigation,
   components, responsiveness, native dialogs, clutter), each with file/page references.
 - **Feature inventory** of what must survive: forms and their fields, buttons and the
   action each triggers, links/routes, table columns, filters, bulk actions, role-based
   visibility. This list is your regression checklist in Phase 5.
-- **Plan**: tokens → base styles → components → layouts → pages, in that order.
+- **Plan**: flows/IA → tokens → base styles → components (with every state from
+  `references/states-and-edge-cases.md`) → layouts → pages, in that order.
 
 If the user only asked for one page or component, scope the audit to that, but still
 check whether a shared component or token change is the right fix.
@@ -147,7 +161,9 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    modal/dialog, toast, dropdown, tabs, pagination, empty state, skeleton/loading — and,
    where the preset calls for them, the modern patterns: pill chips/segmented control,
    circular icon buttons, big-number stats, avatar stack, switch, progress, chart legend,
-   grid↔list toggle, search pill, status card.
+   grid↔list toggle, search pill, status card. Give every component its full state set
+   (hover, focus, active, selected, disabled, loading, error, empty) and make it survive
+   long text and big numbers (`references/states-and-edge-cases.md`).
    In component frameworks, make these real components with props/variants. In
    server-rendered or plain HTML projects, make them CSS classes (e.g. `.btn`,
    `.btn--primary`) plus partials/includes where the templating supports it.
@@ -162,7 +178,13 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    See "Replacing native dialogs safely" below — this is the most common place to
    introduce bugs.
 
-5. **Theming (when wanted).** If the user wants colors to be settable — by an admin for
+5. **Style guide.** Generate a living style guide from the tokens and component CSS:
+   `python <skill>/scripts/make_styleguide.py --tokens <tokens.css> --css <components.css> … --out <public>/styleguide.html`.
+   It renders swatches, type scale, spacing, radius, shadows and component samples using
+   the real CSS (with a dark toggle if a dark theme exists). Open it: inconsistencies and
+   broken dark-mode tokens show up immediately. Ship it (e.g. `/styleguide`) so the team
+   reuses components instead of inventing new ones.
+6. **Theming (when wanted).** If the user wants colors to be settable — by an admin for
    the whole site, or per visitor — follow `references/theming.md`: copy
    `assets/theme.js` + `assets/theme.css`, add the head boot snippet, and add an
    "Tampilan / Appearance" settings section. Even if not requested, structure tokens so
@@ -188,9 +210,14 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    - Keep every `id`, `name`, `data-*` attribute, form `action`/`method`, event handler,
      route and CSRF token that the code or tests depend on. Changing a class name is fine
      only after you've checked no JS/tests select by it (grep for it).
-3. Preserve accessibility while restyling: real `<button>` for actions, `<a>` for
-   navigation, `<label for>` on inputs, visible focus states, color contrast ≥ 4.5:1 for
-   body text, touch targets ≥ 40px on mobile, `aria-*` on modals/menus.
+3. Preserve and improve accessibility while restyling (`references/accessibility.md`):
+   real `<button>` for actions, `<a>` for navigation, `<label for>` on inputs, visible
+   focus, contrast ≥ 4.5:1 for body and muted text, one `<h1>` and ordered headings,
+   landmarks (`<main>`, `<nav>`), touch targets ≥ 24px (44px recommended).
+4. Design every page's data states: first load (skeleton), empty, no results, error,
+   many items (`references/states-and-edge-cases.md`).
+5. Respect the performance budget (`references/performance.md`): right-sized WebP/AVIF
+   images with dimensions, lazy below the fold, ≤ 4 font files, deferred scripts.
 
 ### Phase 5 — Verify (this is not optional)
 
@@ -199,9 +226,14 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    (run with `--help` for options). It screenshots each page at mobile (375), tablet
    (768), laptop (1280) and desktop (1440) widths and reports horizontal overflow,
    elements wider than the viewport, overlapping interactive elements, clipped text,
-   small touch targets, near-miss alignments (edges 2–6px off a shared line) and the text budget. Fix every
-   finding, then re-run until clean. Look at the screenshots yourself — the script
-   catches mechanical problems, not ugliness.
+   small touch targets, near-miss alignments (edges 2–6px off a shared line) and the text
+   budget. Once per page it also runs a WCAG 2.2 audit with axe-core (if installed) and a
+   performance pass (LCP, CLS, blocking time, image and font problems; add `--slow` for a
+   mid-range phone on 4G). Add `--stress` to re-check every page with doubled text, long
+   unbroken words and huge numbers. Fix every finding, then re-run until clean. Look at the
+   screenshots yourself: the script catches mechanical problems, not ugliness. Then do
+   the manual 10-minute accessibility pass (keyboard, zoom, screen reader skim) in
+   `references/accessibility.md`.
 2. **Text budget.** `responsive_check.js` also reports too much text in the first phone
    screen, paragraphs over 30 words, button labels over 3 words and headings over 10
    words (long-form content in `<article>`/`[data-long-text]` is exempt). Rewrite until
@@ -214,10 +246,15 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    still submits with the same fields, every button still triggers its action, every
    route still renders, every confirm still guards the destructive action. Run the
    project's test suite and linter/build if they exist.
-5. **Report** to the user: what changed (grouped), where the tokens/components live and
-   how to re-theme (e.g. "change `--color-primary` in `styles/tokens.css`"), what was
-   removed and why, anything you weren't able to verify, and before/after screenshots
-   if you captured them.
+5. **Heuristic re-score.** Re-score the same screens from Phase 2 and note before → after.
+6. **Report** to the user: what changed (grouped), flow changes with step counts, where
+   the tokens/components/style guide live and how to re-theme (e.g. "change
+   `--color-primary` in `styles/tokens.css`"), what was removed and why, accessibility
+   and performance results, anything you weren't able to verify. If you captured a
+   baseline, run `responsive_check.js … --out ui-after`, then
+   `node <skill>/scripts/before_after.js --before ui-before --after ui-after --out ui-report --notes CHANGES.md`
+   and give the user `ui-report/index.html`: side-by-side screenshots per page and width
+   with issue counts, plus your notes. It's the deliverable a client or team can review.
 
 ## What may be removed (and what may not)
 
@@ -290,6 +327,11 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `references/landing-page.md` — product/landing page formula: navbar, hero variants, stat strip, steps, bento features with live mini-demos, pricing/transparency, CTA band, footer, typography/color recipes, Indonesian copywriting. Read for public/marketing pages.
 - `references/mobile-app.md` — safe areas, thumb zone, app bar, bottom nav, sheets, onboarding. Read when mobile/app-like UI is in scope.
 - `references/theming.md` — site-wide / per-user color, dark mode, corner and density switching. Read when colors should be settable.
+- `references/ux-flows.md` — top tasks, flow mapping with step counts, step-cutting patterns, sitemap/IA rules, naming, per-screen hierarchy, the UX brief template. Read in Phase 2 (both modes).
+- `references/heuristics.md` — Nielsen's 10 heuristics with what to look for, fixes, severity 0–4 and a report template. Read in Phase 2 and Phase 5.
+- `references/states-and-edge-cases.md` — component state matrix, page/data states, content edge cases, coping rules (clamp, truncate, wrap), optimistic UI and undo, offline. Read in Phase 3–4.
+- `references/accessibility.md` — WCAG 2.2 AA: automated + manual 10-minute pass, contrast, keyboard/focus, semantics, forms, media, motion, touch, axe fixes table. Read in Phase 4–5.
+- `references/performance.md` — Core Web Vitals budgets, measuring, images, fonts, CSS/JS, layout stability, perceived speed. Read in Phase 4–5.
 - `references/site-types.md` — per site type (company profile, landing, e-commerce, blog/docs, portfolio, booking, education, admin, government/forms, auth, utility, mobile web): core pages, key components, text level, preset, pitfalls, plus pages every site needs. Read first, in both modes.
 - `references/content-clarity.md` — the "less text" rules: text budgets, turning sentences into structure, the 1-1-1 card rule, one screen one job, microcopy lengths, Indonesian before/after rewrites, color as information. Read in Phase 2 and Phase 4.
 - `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
@@ -298,5 +340,7 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
 - `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls; `--all` also lists beforeunload, window.open, title tooltips and unstyled native controls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
-- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/native-dialog detection.
+- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/native-dialog detection, WCAG audit (axe-core), performance metrics (`--slow`), and stress test (`--stress`).
+- `scripts/before_after.js` — client-ready before/after report (side-by-side screenshots per page and width, issue counts, notes).
+- `scripts/make_styleguide.py` — living style guide page generated from tokens + component CSS.
 - `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).
