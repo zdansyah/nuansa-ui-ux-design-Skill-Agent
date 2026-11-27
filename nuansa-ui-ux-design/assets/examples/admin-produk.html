@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produk · Toko Maju Admin</title>
+<!--
+  Reference implementation for the nuansa-ui-ux-design skill: the messy "Admin Toko Maju"
+  page from evals/messy-admin-full-redesign, redesigned. Every original feature still works:
+  menu entries, Tambah Produk (was prompt), Export (was alert), Edit (was confirm),
+  Hapus links (#hapus-1/2, was confirm), and the Diskon form (fields kode + persen, action #diskon).
+  Removed: the welcome banner, the paragraph repeating the title, the duplicate top menu.
+  Moved: the row number into the product meta line; Logout into the sidebar footer.
+  Added only what derives from existing data: the 4 stat tiles and the status filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../starter/nuansa.css">
+<link rel="stylesheet" href="../ui-controls.css">
+<link rel="stylesheet" href="../ui-feedback.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5.9z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+  <symbol id="i-percent" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></symbol>
+</svg>
+<a class="skip-link" href="#konten">Lompat ke konten</a>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Menu utama">
+    <a class="brand" href="#"><span class="brand__mark"><svg class="icon"><use href="#i-box"/></svg></span>Toko Maju</a>
+    <nav class="nav-group" aria-label="Utama">
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-grid"/></svg><span>Dashboard</span></a>
+    </nav>
+    <nav class="nav-group" aria-label="Katalog">
+      <p class="nav-group__label">Katalog</p>
+      <a class="nav-item" href="#" aria-current="page"><svg class="icon"><use href="#i-box"/></svg><span>Produk</span></a>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-tag"/></svg><span>Kategori</span></a>
+    </nav>
+    <nav class="nav-group" aria-label="Penjualan">
+      <p class="nav-group__label">Penjualan</p>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-cart"/></svg><span>Pesanan</span><span class="count">3</span></a>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-card"/></svg><span>Pembayaran</span></a>
+    </nav>
+    <nav class="nav-group" aria-label="Akses">
+      <p class="nav-group__label">Akses</p>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-users"/></svg><span>Pengguna</span></a>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-shield"/></svg><span>Peran</span></a>
+    </nav>
+    <nav class="nav-group" aria-label="Sistem">
+      <p class="nav-group__label">Sistem</p>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-settings"/></svg><span>Pengaturan</span></a>
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-file"/></svg><span>Log</span></a>
+    </nav>
+    <div class="nav-group" style="margin-top:auto">
+      <a class="nav-item" href="#"><svg class="icon"><use href="#i-logout"/></svg><span>Logout</span></a>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn hide-desktop" id="menuBtn" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <label class="search">
+        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" id="q" placeholder="Cari produk" aria-label="Cari produk">
+      </label>
+      <div class="topbar__end">
+        <button class="icon-btn" aria-label="Notifikasi" data-tooltip="Notifikasi" data-tooltip-pos="bottom"><svg class="icon"><use href="#i-bell"/></svg><span class="dot"></span></button>
+        <span class="avatar" aria-label="Admin">AD</span>
+      </div>
+    </header>
+
+    <main class="content" id="konten">
+      <div class="page-header">
+        <div>
+          <p class="page-header__eyebrow">Katalog</p>
+          <h1 class="page-header__title">Produk</h1>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--secondary" id="exportBtn"><svg class="icon"><use href="#i-download"/></svg>Ekspor</button>
+          <button class="btn btn--primary" id="addBtn"><svg class="icon"><use href="#i-plus"/></svg>Tambah produk</button>
+        </div>
+      </div>
+
+      <section class="bento" aria-label="Ringkasan">
+        <div class="card stat stat--tint" style="--tint: var(--tint-lime)">
+          <div class="stat__top"><span class="stat__label">Total produk</span><span class="stat__icon"><svg class="icon"><use href="#i-box"/></svg></span></div>
+          <p class="stat__value" id="statCount">2</p>
+        </div>
+        <div class="card stat">
+          <div class="stat__top"><span class="stat__label">Stok tersedia</span><span class="stat__icon"><svg class="icon"><use href="#i-grid"/></svg></span></div>
+          <p class="stat__value">120<small>pcs</small></p>
+        </div>
+        <div class="card stat">
+          <div class="stat__top"><span class="stat__label">Stok habis</span><span class="badge badge--danger">Perlu restok</span></div>
+          <p class="stat__value">1</p>
+        </div>
+        <div class="card stat stat--tint" style="--tint: var(--tint-violet)">
+          <div class="stat__top"><span class="stat__label">Nilai stok</span><span class="stat__icon"><svg class="icon"><use href="#i-arrow"/></svg></span></div>
+          <p class="stat__value"><small style="margin:0 2px 0 0">Rp</small>9 jt</p>
+        </div>
+      </section>
+
+      <div class="grid-2">
+        <section class="card card--flush" aria-labelledby="t-produk">
+          <div class="toolbar">
+            <h2 class="card__title" id="t-produk">Daftar produk</h2>
+            <div class="chips" role="tablist" aria-label="Filter status">
+              <button class="chip" role="tab" aria-selected="true" data-filter="all">Semua <span class="count">2</span></button>
+              <button class="chip" role="tab" aria-selected="false" data-filter="aktif">Aktif <span class="count">1</span></button>
+              <button class="chip" role="tab" aria-selected="false" data-filter="habis">Habis <span class="count">1</span></button>
+            </div>
+          </div>
+          <div class="table-scroll">
+          <table class="table table--stack">
+            <thead><tr><th>Produk</th><th>Harga</th><th>Stok</th><th>Status</th><th class="actions"><span class="sr-only">Aksi</span></th></tr></thead>
+            <tbody id="rows">
+              <tr data-status="aktif">
+                <td><div class="cell-product"><span class="thumb" style="--tint: var(--tint-sky)">KP</span><div><p class="cell-product__name">Kaos Polos Premium Cotton Combed 30s</p><p class="cell-product__meta">#1 · Pakaian</p></div></div></td>
+                <td data-label="Harga" class="num">Rp75.000</td>
+                <td data-label="Stok" class="num">120</td>
+                <td data-label="Status"><span class="badge badge--success">Aktif</span></td>
+                <td class="actions">
+                  <button class="icon-btn icon-btn--sm icon-btn--plain" onclick="ubah(1)" aria-label="Edit Kaos Polos" data-tooltip="Edit"><svg class="icon"><use href="#i-edit"/></svg></button>
+                  <a class="icon-btn icon-btn--sm icon-btn--plain icon-btn--danger" href="#hapus-1" data-confirm="Hapus Kaos Polos Premium? Tindakan ini tidak bisa dibatalkan." data-confirm-title="Hapus produk" data-confirm-ok="Hapus" aria-label="Hapus Kaos Polos" data-tooltip="Hapus"><svg class="icon"><use href="#i-trash"/></svg></a>
+                </td>
+              </tr>
+              <tr data-status="habis">
+                <td><div class="cell-product"><span class="thumb" style="--tint: var(--tint-orange)">CC</span><div><p class="cell-product__name">Celana Chino Slim Fit</p><p class="cell-product__meta">#2 · Pakaian</p></div></div></td>
+                <td data-label="Harga" class="num">Rp180.000</td>
+                <td data-label="Stok" class="num">0</td>
+                <td data-label="Status"><span class="badge badge--danger">Habis</span></td>
+                <td class="actions">
+                  <button class="icon-btn icon-btn--sm icon-btn--plain" onclick="ubah(2)" aria-label="Edit Celana Chino" data-tooltip="Edit"><svg class="icon"><use href="#i-edit"/></svg></button>
+                  <a class="icon-btn icon-btn--sm icon-btn--plain icon-btn--danger" href="#hapus-2" data-confirm="Hapus Celana Chino Slim Fit? Tindakan ini tidak bisa dibatalkan." data-confirm-title="Hapus produk" data-confirm-ok="Hapus" aria-label="Hapus Celana Chino" data-tooltip="Hapus"><svg class="icon"><use href="#i-trash"/></svg></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="empty" id="empty" hidden>
+            <span class="empty__icon"><svg class="icon"><use href="#i-search"/></svg></span>
+            <p><strong>Tidak ada hasil</strong></p>
+            <button class="btn btn--ghost btn--sm" id="resetBtn">Reset filter</button>
+          </div>
+        </section>
+
+        <form class="card stack" id="form-diskon" action="#diskon" method="get" aria-labelledby="t-diskon">
+          <div>
+            <h2 class="card__title" id="t-diskon">Diskon</h2>
+            <p class="card__sub">Berlaku untuk semua produk.</p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="kode">Kode</label>
+            <input class="input" id="kode" name="kode" placeholder="HEMAT10" required autocomplete="off" data-error-required="Isi kode diskon.">
+          </div>
+          <div class="field">
+            <label class="field__label" for="persen">Potongan</label>
+            <div class="input-affix">
+              <input class="input" id="persen" name="persen" type="number" min="1" max="90" required inputmode="numeric" placeholder="10">
+              <span class="input-affix__end">%</span>
+            </div>
+          </div>
+          <button class="btn btn--primary btn--block" type="submit" data-confirm="Simpan diskon ini?" data-confirm-variant="primary" data-confirm-ok="Simpan">Simpan</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="../ui-feedback.js"></script>
+<script>
+  // Original behaviors, same entry points (tambah, ubah), now without native dialogs.
+  async function tambah() {
+    const n = await UI.prompt({ title: 'Tambah produk', label: 'Nama produk', placeholder: 'mis. Topi Bucket', required: true, confirmText: 'Tambah' });
+    if (n) UI.toast(`${n} ditambahkan`, { type: 'success' });
+  }
+  async function ubah(id) {
+    if (await UI.confirm({ title: 'Edit produk', message: `Buka editor untuk produk #${id}?`, confirmText: 'Edit', variant: 'primary' })) {
+      window.location.hash = 'edit-' + id;
+    }
+  }
+  document.getElementById('addBtn').addEventListener('click', tambah);
+  document.getElementById('exportBtn').addEventListener('click', () => UI.toast('Fitur ekspor belum tersedia', { type: 'info' }));
+
+  // Mobile drawer.
+  const sidebar = document.getElementById('sidebar'), scrim = document.getElementById('scrim'), menuBtn = document.getElementById('menuBtn');
+  const setMenu = (open) => { sidebar.classList.toggle('is-open', open); scrim.classList.toggle('is-open', open); menuBtn.setAttribute('aria-expanded', String(open)); };
+  menuBtn.addEventListener('click', () => setMenu(!sidebar.classList.contains('is-open')));
+  scrim.addEventListener('click', () => setMenu(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+
+  // Status filter + search (client-side, derived from the existing rows).
+  const rows = [...document.querySelectorAll('#rows tr')], empty = document.getElementById('empty');
+  let filter = 'all';
+  function apply() {
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach((r) => { const ok = (filter === 'all' || r.dataset.status === filter) && r.textContent.toLowerCase().includes(q); r.hidden = !ok; if (ok) shown++; });
+    empty.hidden = shown > 0;
+  }
+  document.querySelectorAll('[data-filter]').forEach((c) => c.addEventListener('click', () => {
+    filter = c.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-selected', String(x === c)));
+    apply();
+  }));
+  document.getElementById('q').addEventListener('input', apply);
+  document.getElementById('resetBtn').addEventListener('click', () => { document.getElementById('q').value = ''; document.querySelector('[data-filter="all"]').click(); });
+</script>
+</body>
+</html>

@@ -9,6 +9,20 @@ diganti temanya**, tanpa merusak fitur yang sudah berjalan.
 portfolio, booking/jasa, kursus online, admin panel/dashboard, layanan publik/formulir,
 halaman login, tool satu fungsi, dan web app mobile/PWA.
 
+## Contoh hasil
+
+Halaman admin berantakan dari `evals/` setelah di-redesign dengan skill ini. Semua fitur
+lama tetap jalan, dan halaman ini lolos semua cek: responsive, aksesibilitas, dan stress test.
+
+| Desktop | Mobile |
+|---|---|
+| ![Contoh admin desktop](docs/screenshots/contoh-admin-desktop.jpg) | ![Contoh admin mobile](docs/screenshots/contoh-admin-mobile.jpg) |
+
+Laporan sebelum/sesudah otomatis dan style guide:
+
+![Laporan sebelum sesudah](docs/screenshots/laporan-sebelum-sesudah.jpg)
+![Komponen style guide](docs/screenshots/styleguide-komponen.jpg)
+
 ## Isi
 
 ```
@@ -32,6 +46,8 @@ nuansa-ui-ux-design/
 │   ├── theming.md               # Ganti warna seluruh web dari satu tempat + mode gelap
 │   └── native-ui.md             # Hilangkan semua tampilan bawaan browser/Windows (popup, balon validasi, kontrol)
 ├── assets/
+│   ├── starter/nuansa.css       # Gaya default "Nuansa": token, layout, semua komponen (siap pakai)
+│   ├── examples/                # Contoh jadi: admin-produk.html (patokan kualitas) + styleguide.html
 │   ├── ui-feedback.js / .css    # Pengganti semua popup bawaan: alert/confirm/prompt, balon validasi, "Leave site?", tooltip
 │   ├── ui-controls.css          # Checkbox, radio, select, file input, scrollbar, autofill ikut design system
 │   └── theme.js / .css          # Engine tema runtime + panel pemilih warna (Theme.apply, Theme.mountPicker)

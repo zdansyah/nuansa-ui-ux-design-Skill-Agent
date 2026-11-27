@@ -7,7 +7,8 @@ token change.
 
 ## Contents
 - How to extract a style from reference images
-- Preset 1 — Clean Pro (default; admin-heavy apps)
+- Preset 0 — Nuansa (the skill's default; ready-made in assets/starter/nuansa.css)
+- Preset 1 — Clean Pro (conservative, data-dense admin)
 - Preset 2 — Soft Bento (dashboards, SaaS)
 - Preset 3 — Mono + Accent (bold, Gen-Z, mobile-first; e.g. black + lime)
 - Preset 4 — Status Pastel (task/application tracking, utility apps)
@@ -46,7 +47,17 @@ signature components (`components.md` → "Modern patterns"), and apply to pages
 user only gives images and an existing app, keep the app's information architecture and
 features; borrow the visual language, not the content.
 
-## Preset 1 — Clean Pro (default)
+## Preset 0 — Nuansa (default)
+
+The skill's signature look and the default for any project without a brand system. It
+combines the strongest shared signals of the reference shots: soft neutral canvas,
+borderless white cards (24px radius), ink pill primary buttons, circular icon buttons,
+one accent (violet by default), pastel tints for stat tiles and categories, big tabular
+numbers, very little text. Everything is implemented in `assets/starter/nuansa.css`, and
+`assets/examples/admin-produk.html` shows it on a real admin page. Re-theme by editing the
+Brand block (`--color-primary`, `--color-action`) or at runtime with `assets/theme.js`.
+
+## Preset 1 — Clean Pro (conservative, data-dense admin)
 
 Best for: admin panels, internal tools, data-heavy apps, conservative brands.
 
@@ -55,7 +66,7 @@ Best for: admin panels, internal tools, data-heavy apps, conservative brands.
 - Radius: soft (`6 / 10 / 16`, controls 8px).
 - Type: 14–16px body, page titles 24px/600.
 - Density: comfortable, can go compact in tables.
-- This is what `design-tokens.md` ships by default.
+- This is what the generic templates in `design-tokens.md` show. Prefer Nuansa unless the brand is conservative or the screens are extremely data-dense.
 
 ## Preset 2 — Soft Bento (reference: project dashboards, income trackers)
 

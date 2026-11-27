@@ -128,9 +128,10 @@ Produce a short audit (in the conversation, or as `UI-AUDIT.md` if the project i
 If the user only asked for one page or component, scope the audit to that, but still
 check whether a shared component or token change is the right fix.
 
-**Choose a style direction.** Read `references/style-presets.md` and pick one preset
-(Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel Blocks) that fits the product and any
-reference images. If the user shared reference images/screenshots, write a short
+**Choose a style direction.** The default is **Nuansa** (see "The default look" below and
+`assets/starter/nuansa.css`). Switch to another preset in `references/style-presets.md`
+(Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel
+Blocks) only when the product, brand or reference images call for it. If the user shared reference images/screenshots, write a short
 "reference style spec" first (colors, radius, type scale, density, signature components)
 as described there, and map it to tokens — borrow the visual language, keep the app's
 own features and information architecture. If the user gave **reference URLs**, run
@@ -145,8 +146,9 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
 
 ### Phase 3 — Build the foundation (tokens + base + components)
 
-1. **Tokens.** Read `references/design-tokens.md` and create (or consolidate into) a single
-   token source: CSS custom properties, Tailwind theme, or Sass variables, matching the
+1. **Tokens.** Without an existing design system, start from `assets/starter/nuansa.css`
+   (tokens, base, layout and components in one file). Otherwise read
+   `references/design-tokens.md` and create (or consolidate into) a single token source: CSS custom properties, Tailwind theme, or Sass variables, matching the
    stack. Include color (with semantic names like `--color-primary`, `--color-danger`,
    `--color-surface`, `--color-text-muted`), spacing scale, type scale, radius, shadow,
    z-index, transition and breakpoints, plus `--color-primary-text`, `--color-ink` and
@@ -299,25 +301,41 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - Keep the same wording intent but make messages specific: "Hapus pengguna *Budi*? Tindakan
   ini tidak bisa dibatalkan." beats "Are you sure?".
 
-## Style defaults (use unless the project already has a brand)
+## The default look: Nuansa (use unless the project already has a brand or another preset fits better)
 
-- **Font**: system UI stack or one clean sans (Inter, Plus Jakarta Sans, Geist). Max two
-  weights for body (400/500) plus 600 for headings. Base size 16px on public sites,
-  14–15px is acceptable inside dense admin tables.
-- **Color**: neutral gray scale for 90% of the UI, one primary accent, semantic
-  success/warning/danger/info. White or near-white surfaces on a very light gray app
-  background. Avoid pure black text; use a dark neutral (e.g. `#0f172a`/`#111827`).
-- **Spacing**: 4px base scale (4, 8, 12, 16, 20, 24, 32, 40, 48, 64). Generous section
-  spacing, tight related-element spacing — proximity communicates grouping.
-- **Radius**: one small (6px) for inputs/buttons and one medium (10–12px) for cards/modals.
-- **Shadow**: subtle, used for elevation only (dropdowns, modals, sticky headers), not on
-  every card — prefer a 1px border on cards.
-- **Motion**: 150–200ms ease-out for hover/focus/open; respect `prefers-reduced-motion`.
-- **Icons**: one icon set, one size per context, always paired with text for primary
-  actions (icon-only buttons need `aria-label` and a tooltip).
+Generic "admin template" output (blue buttons, 1px borders everywhere, 6px corners,
+gray tables) is the most common way a redesign ends up looking dated. The skill's default
+is the **Nuansa** look, shipped ready to use in `assets/starter/nuansa.css`:
+
+- **Canvas & surfaces**: soft neutral canvas (`#f2f3f5`), white **borderless** cards with
+  large radius (24px), hairlines only inside cards (table rows).
+- **Actions**: **ink (near-black) pill buttons** for the primary action; secondary =
+  white pill with a hairline; icon-only actions as circular buttons. One accent color
+  (violet by default) for active states, focus, charts and highlights.
+- **Type**: Plus Jakarta Sans (or system UI), large semibold page titles with tight
+  tracking, small muted labels, **big tabular numbers** for stats.
+- **Color for meaning**: pastel tints (lime, violet, orange, sky, pink, mint) for stat tiles,
+  thumbnails and categories; semantic badges with a dot.
+- **Shapes**: pills for buttons, chips and inputs-with-search; 10/18/24px radius scale.
+- **Text**: very little (see `content-clarity.md`).
+- **Motion**: 150–200ms ease-out; respects `prefers-reduced-motion`.
+
+**Calibrate before you design.** Open `assets/examples/admin-produk.html` (the messy
+eval page, redesigned with every feature intact) and `assets/examples/styleguide.html`, or
+screenshot them, so you know the quality bar. Your output should look at least this clean
+and consistent. If it looks like a default Bootstrap/admin template, it isn't done.
+
+For plain HTML or server-rendered projects without an existing design system, start from
+`nuansa.css` (copy it, then adjust the Brand block). For Tailwind/React/Vue projects, port
+its tokens and component rules into the project's theme and components. When the project
+has a brand, keep the brand color as `--color-primary` (or `--color-action` for colored
+buttons) and keep the rest of the Nuansa system.
 
 ## Bundled resources
 
+- `assets/starter/nuansa.css` — the default Nuansa look: tokens (light + dark), base, app shell (sidebar drawer, topbar), page header, buttons, chips, cards, stat tiles, badges, responsive table, forms, search, progress, empty state. Hardened against long text and WCAG contrast.
+- `assets/examples/admin-produk.html` — reference implementation (quality bar): the messy eval admin page redesigned with all features intact, passing every check, including stress and axe.
+- `assets/examples/styleguide.html` — the Nuansa style guide generated with `make_styleguide.py`.
 - `references/audit-checklist.md` — page-by-page audit + final QA checklist. Read in Phase 2 and Phase 5.
 - `references/design-tokens.md` — token templates for plain CSS, Tailwind and Bootstrap/Sass, plus dark mode. Read in Phase 3.
 - `references/components.md` — specs and markup patterns for every core component, including responsive tables. Read in Phase 3.
