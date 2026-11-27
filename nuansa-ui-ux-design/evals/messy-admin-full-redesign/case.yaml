@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: messy-admin-full-redesign
+expected_outcome: |
+  index.html is redesigned with a token-based stylesheet, grouped sidebar, responsive table, no native dialogs, and all original features (add, export, edit, delete, discount form) still working.
+context:
+  scaffold_script: place-files.sh

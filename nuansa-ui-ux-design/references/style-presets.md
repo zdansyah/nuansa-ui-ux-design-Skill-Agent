@@ -1,0 +1,181 @@
+# Style Presets & Learning From Reference Images
+
+"Modern minimalist" covers several distinct looks. Pick one direction per project and
+apply it consistently — mixing them is what makes a UI feel generic. Each preset below is
+a set of token overrides plus component-shape rules, so switching presets is mostly a
+token change.
+
+## Contents
+- How to extract a style from reference images
+- Preset 1 — Clean Pro (default; admin-heavy apps)
+- Preset 2 — Soft Bento (dashboards, SaaS)
+- Preset 3 — Mono + Accent (bold, Gen-Z, mobile-first; e.g. black + lime)
+- Preset 4 — Status Pastel (task/application tracking, utility apps)
+- Shared "modern" signals across all presets
+- What makes a UI look dated (avoid)
+- Dribbble-to-production adjustments
+
+---
+
+## How to extract a style from reference images
+
+When the user shares screenshots/Dribbble shots, don't copy pixels — extract a spec and
+map it to tokens before writing code. Write the spec down (in the conversation) like this:
+
+```
+Reference style spec
+- Background: very light cool gray (#eef0f4); cards white, borderless, soft shadow or none
+- Accent: lime #d4ff3a used as FILL only (cards, active chip, progress); text on it black
+- Primary action: near-black pill (#111) with white text
+- Radius: cards 24–28px, controls fully pill (9999px), icon buttons circular 40–44px
+- Type: large display headings (32–40px mobile, 48–64px desktop), weight 500, tight tracking (-0.02em);
+  muted eyebrow/subtitle above title; big numbers for KPIs with small muted label below
+- Density: airy; 20–24px card padding; 12–16px gaps in bento grid
+- Signature details: circular outline icon buttons at card top-right (↗, +, filter);
+  hatched/striped pattern for the "remaining" part of progress bars & inactive chart bars;
+  avatar stack + "+" button; segmented bottom nav with wider active black pill
+- Maps to: Preset 3 (Mono + Accent) with radius=round
+```
+
+Then: set tokens (`design-tokens.md`), set `--radius-control` / radius preset, build the
+signature components (`components.md` → "Modern patterns"), and apply to pages. If the
+user only gives images and an existing app, keep the app's information architecture and
+features; borrow the visual language, not the content.
+
+## Preset 1 — Clean Pro (default)
+
+Best for: admin panels, internal tools, data-heavy apps, conservative brands.
+
+- Background `#f8fafc`, white cards with 1px `--color-border`, no or tiny shadow.
+- Accent: one saturated brand color (blue/indigo/teal). Primary button = accent fill.
+- Radius: soft (`6 / 10 / 16`, controls 8px).
+- Type: 14–16px body, page titles 24px/600.
+- Density: comfortable, can go compact in tables.
+- This is what `design-tokens.md` ships by default.
+
+## Preset 2 — Soft Bento (reference: project dashboards, income trackers)
+
+Best for: SaaS dashboards, analytics home pages, portfolio/freelancer apps.
+
+```css
+:root {
+  --color-bg: #eef1f5;              /* soft cool gray canvas */
+  --color-surface: #fbfcfd;         /* cards almost white */
+  --color-border: transparent;      /* borderless cards */
+  --color-text: #111318;
+  --color-text-muted: #6b7280;
+  --color-primary: #111318;         /* near-black is the "primary"; color is for data */
+  --color-on-primary: #ffffff;
+  --radius-sm: 12px; --radius-md: 24px; --radius-lg: 32px; --radius-control: 9999px;
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / .04), 0 8px 24px rgb(16 24 40 / .04);
+}
+```
+
+Signature rules:
+- **Bento grid**: dashboard made of cards of different spans on a 12-col grid
+  (e.g. tasks 4 cols tall, overview 4, chart 4, invoice 8). Gap 16–24px.
+- **Card header** = title (18–20px/500) left + circular outline icon button right
+  (`+` add, `↗` open, sliders filter). No card footers.
+- **Pill segmented filters** at page or card level (Today / This Week / This Month):
+  active = black fill, inactive = outlined pill.
+- **Big page title** (40–56px desktop) with a muted one-line eyebrow above it.
+- **Icon rail sidebar**: 72px, circular icon buttons, active = black filled circle.
+- **Data colors** carry the color: orange/blue/purple series on a neutral UI;
+  legends as colored dots + label + value ("● In Progress: 14").
+- Tinted task cards (very soft orange/blue backgrounds) for items needing attention.
+
+## Preset 3 — Mono + Accent (reference: black + lime mobile apps)
+
+Best for: consumer/mobile apps, fintech-lite, HR/team apps, modern landing pages, brands
+that want energy without clutter.
+
+```css
+:root {
+  --color-bg: #e9eaec;              /* light neutral gray canvas */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2f3f5;
+  --color-border: transparent;
+  --color-text: #0a0a0a;
+  --color-text-muted: #6b6f76;
+  --color-primary: #d4ff3a;         /* lime accent = FILL color */
+  --color-on-primary: #0a0a0a;      /* dark text on lime */
+  --color-primary-text: #4d6400;    /* lime darkened for text on white (theme.js derives this) */
+  --color-ink: #0a0a0a;             /* black for primary CTAs, active chips, active nav */
+  --radius-sm: 14px; --radius-md: 28px; --radius-lg: 36px; --radius-control: 9999px;
+}
+```
+
+Signature rules:
+- **Two-level emphasis**: black (`--color-ink`) for the main action/active state, accent
+  for highlight surfaces (one hero card, progress fill, selected chart bar, toggle on).
+  Everything else is white/gray. Use the accent on ≤ 10–15% of the screen.
+- **Color-blocked hero card**: one card per screen fully filled with the accent,
+  containing a big number (48–64px) + small label ("28 / In Team").
+- **Hatched "remaining" fill**: progress bars and inactive chart bars use a diagonal
+  stripe pattern instead of a flat gray:
+  `background: repeating-linear-gradient(135deg, transparent 0 6px, rgb(0 0 0 / .08) 6px 7px);`
+- **Pill chart bars**: rounded-full bars; the selected one in accent with value label above.
+- **Circular icon buttons** (44px) grouped top-right; the "go" action (↗) in black.
+- **Avatar stack** (overlap -10px, 2px white ring) ending with a black "+" circle.
+- **Big display type** with tight tracking; currency symbol as superscript (`$1,680`).
+- **Segmented bottom nav**: floating pill container; active item is a wider black pill.
+- Calendar: days as rounded squares, selected = black square with check.
+
+## Preset 4 — Status Pastel (reference: grid vs list application tracker)
+
+Best for: request/application tracking, ticketing, task lists, government/service apps.
+
+- Neutral white UI, cool very light background (`#f3f4fb`).
+- **Status drives color**: each status maps to one hue used as a soft card background
+  + a solid pill badge with icon/dot:
+  revision/pending → orange, ongoing → gray, issued/completed → green, rejected → red.
+  ```css
+  .status-card { border-radius: var(--radius-md); padding: var(--space-4); background: var(--status-soft, var(--color-surface-muted)); }
+  .status-card[data-status="revision"] { --status: #f97316; --status-soft: #fff4ec; }
+  .status-card[data-status="ongoing"]  { --status: #6b7280; --status-soft: #f1f2f6; }
+  .status-card[data-status="done"]     { --status: #10b981; --status-soft: #e8f8f3; }
+  .status-card[data-status="rejected"] { --status: #e11d48; --status-soft: #fdecef; }
+  ```
+- **Sectioned lists**: small muted section labels ("Updates", "History"). Active items
+  use tinted cards (they need attention); history uses plain white cards with a border
+  (de-emphasized) — color is reserved for what's actionable now.
+- **Grid ↔ List toggle** for the same data: grid = 2-col cards with status icon top,
+  title, status text in status color, relative time muted; list = full-width rows with
+  badge + time on top line, title, chevron right. Same component, two layouts.
+- Filter chips row under the title (All / Active / Completed), active = dark fill.
+- Relative time ("2 min ago") muted and right-aligned in list view.
+
+## Shared "modern" signals across all presets
+
+- Generous whitespace; fewer, larger, clearer elements.
+- Pill or softly-rounded controls; circular icon buttons for secondary actions.
+- One accent; near-black for primary emphasis; color mostly for data and status.
+- Large confident headings, medium weight, slightly tight tracking; small muted labels.
+- Big numbers for KPIs with tiny labels; tabular numerals.
+- Borderless cards separated by background contrast (or 1px hairline borders in Clean Pro).
+- Minimal charts: no gridline clutter, rounded bars, dots-and-labels legends, a single
+  highlighted data point with a dark tooltip pill.
+- Mobile: floating bottom nav, circular back button, sheet-style cards, thumb-reachable CTAs.
+
+## What makes a UI look dated (avoid)
+
+- Gradient-filled buttons and headers, especially multi-hue (purple→teal), glossy effects.
+- Many saturated colors competing; colored sidebars with white text and icons in boxes.
+- Heavy drop shadows on every card, bevels, thick borders, small border-radius (2–4px)
+  mixed with large ones.
+- Tiny 12–13px body text, ALL-CAPS labels everywhere, centered long paragraphs.
+- Default browser controls, native dialogs, table-based layouts, jQuery-UI themes.
+- Icons in colored circles on every KPI card with no meaning.
+
+## Dribbble-to-production adjustments
+
+Concept shots optimize for a screenshot, not daily use. When adopting them:
+- **Raise contrast**: shots often use light-gray text on light-gray backgrounds. Keep
+  body text ≥ 4.5:1 and muted text ≥ 4.5:1 for anything people must read.
+- **Raise text size**: keep body ≥ 14px (admin) / 16px (public & mobile).
+- **Don't copy the presentation frame**: the gradient backdrop and tilted phone mockups
+  are for the shot, not the product.
+- **Real data is longer**: test with long names, big numbers, empty states, 0 items and
+  100+ items; make cards wrap/truncate gracefully.
+- **Keep it accessible**: pill toggles need labels; icon-only circles need `aria-label`;
+  color-coded status needs text.

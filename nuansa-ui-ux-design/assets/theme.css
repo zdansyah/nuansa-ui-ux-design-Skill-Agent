@@ -1,0 +1,24 @@
+/* theme.css — styles for Theme.mountPicker(). Uses the same design tokens. */
+.theme-picker { display: grid; gap: var(--space-5, 1.25rem); max-width: 420px; font-family: var(--font-sans, system-ui, sans-serif); }
+.tp-group { border: 0; margin: 0; padding: 0; display: grid; gap: var(--space-2, .5rem); }
+.tp-label { padding: 0; font-size: var(--text-sm, .875rem); font-weight: var(--weight-medium, 500); color: var(--color-text, #0f172a); }
+.tp-swatches { display: flex; flex-wrap: wrap; gap: var(--space-2, .5rem); }
+.tp-swatch, .tp-custom {
+  position: relative; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--color-surface, #fff); box-shadow: 0 0 0 1px var(--color-border-strong, #cbd5e1);
+  transition: box-shadow var(--duration, 160ms), transform var(--duration, 160ms);
+}
+.tp-swatch:hover, .tp-custom:hover { transform: scale(1.06); }
+.tp-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--color-text, #0f172a); }
+.tp-swatch:focus-visible, .tp-custom:focus-within { outline: none; box-shadow: var(--ring, 0 0 0 3px rgb(37 99 235 / .35)); }
+.tp-custom { overflow: hidden; background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
+.tp-custom input { position: absolute; inset: -8px; width: calc(100% + 16px); height: calc(100% + 16px); opacity: 0; cursor: pointer; }
+.tp-seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--color-surface-muted, #f1f5f9); border-radius: var(--radius-control, 8px); width: fit-content; max-width: 100%; overflow-x: auto; }
+.tp-seg__btn {
+  border: 0; background: transparent; color: var(--color-text-muted, #64748b); cursor: pointer;
+  height: 32px; padding: 0 var(--space-4, 1rem); border-radius: var(--radius-control, 8px);
+  font: inherit; font-size: var(--text-sm, .875rem); font-weight: var(--weight-medium, 500); white-space: nowrap;
+}
+.tp-seg__btn[aria-checked="true"] { background: var(--color-surface, #fff); color: var(--color-text, #0f172a); box-shadow: var(--shadow-sm, 0 1px 2px rgb(15 23 42 / .06)); }
+.tp-seg__btn:focus-visible { outline: none; box-shadow: var(--ring, 0 0 0 3px rgb(37 99 235 / .35)); }
+.tp-reset { justify-self: start; border: 0; background: none; padding: 0; color: var(--color-text-muted, #64748b); font: inherit; font-size: var(--text-sm, .875rem); text-decoration: underline; cursor: pointer; }

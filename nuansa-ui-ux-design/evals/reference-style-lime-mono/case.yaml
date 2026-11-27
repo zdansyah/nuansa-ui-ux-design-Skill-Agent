@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: reference-style-lime-mono
+expected_outcome: |
+  The page adopts a Mono + Accent style (light gray canvas, white rounded cards, black pill controls, lime fills with dark text) through tokens, with readable contrast and all original features intact.
+context:
+  scaffold_script: place-files.sh

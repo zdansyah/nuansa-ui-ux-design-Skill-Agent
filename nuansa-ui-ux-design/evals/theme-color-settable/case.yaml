@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: theme-color-settable
+expected_outcome: |
+  A runtime theming system is added: a single primary color token with derived hover/soft/contrast-safe variants, a picker or settings section to choose the color, and dark mode via data-theme, all persisted.
+context:
+  scaffold_script: place-files.sh
