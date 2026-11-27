@@ -1,9 +1,13 @@
 # Nuansa UI/UX Design — Claude Skill
 
-Skill untuk Claude (Claude Code / Claude.ai) yang mengaudit, me-redesign, dan merapikan
-UI/UX website atau web app (halaman utama, dashboard, admin panel, mobile web) menjadi
-**modern, minimalis, clean, profesional, responsive**, dan **mudah diganti temanya**,
-tanpa merusak fitur yang sudah berjalan.
+Panduan desain UI/UX untuk Claude (Claude Code / Claude.ai) yang bisa dipakai untuk
+**semua jenis website**, baik **membuat baru** maupun **merapikan yang sudah ada**.
+Hasilnya **bersih, rapi, tidak kebanyakan teks, modern, responsive**, dan **mudah
+diganti temanya**, tanpa merusak fitur yang sudah berjalan.
+
+**Cocok untuk:** company profile, landing page/SaaS, toko online, blog/berita/dokumentasi,
+portfolio, booking/jasa, kursus online, admin panel/dashboard, layanan publik/formulir,
+halaman login, tool satu fungsi, dan web app mobile/PWA.
 
 ## Isi
 
@@ -11,6 +15,7 @@ tanpa merusak fitur yang sudah berjalan.
 nuansa-ui-ux-design/
 ├── SKILL.md                     # Alur kerja utama (5 fase) + prinsip desain
 ├── references/
+│   ├── site-types.md            # Panduan per jenis web: halaman, komponen, kadar teks, preset
 │   ├── audit-checklist.md       # Checklist audit per halaman + QA akhir
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
 │   ├── components.md            # Button, form, card, table responsif, modal, toast, chip pill, stat, dll.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: new-ecommerce-from-scratch
+expected_outcome: |
+  A new multi-page shop is built on shared tokens and components, follows the e-commerce guidance (product cards, variant chips, sticky mobile add-to-cart, simple checkout with Indonesian payment methods), stays low on text, works at 375px, and uses no native browser dialogs.

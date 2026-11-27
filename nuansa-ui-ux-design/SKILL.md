@@ -1,13 +1,14 @@
 ---
 name: nuansa-ui-ux-design
-description: Audit, redesign and tidy the UI/UX of a website or web app (landing pages, dashboards, admin panels, mobile web) into a modern, minimalist, clean, responsive, easily re-themed design while keeping every feature working. Use this skill whenever the user asks to redesign, restyle, "rapikan", "perbaiki tampilan", modernize, declutter, or make a site look premium/professional/not outdated ("tidak jadul"); fix layout, spacing, alignment, responsive/mobile issues, overflow or overlapping elements; clean up an admin panel or dashboard; standardize buttons, forms, tables, cards, modals; remove any native browser/Windows UI (alert/confirm/prompt, validation bubbles, "Leave site?", OS-styled controls); make a UI look like reference screenshots, Dribbble shots or a reference website URL; build or tidy a landing/product page; or let the site's colors/theme/dark mode be set from one place ("bisa ganti warna", theme switcher) — even for one page or component, and even when written in Indonesian.
+description: Design, redesign and tidy the UI/UX of any website or web app, new or existing (company profiles, landing/SaaS, e-commerce, blogs and docs, portfolios, booking, education, dashboards, admin panels, government forms, mobile web) into a clean, tidy, low-text, modern design that is responsive and easy to re-theme, without breaking features. Use whenever the user wants to build or design a site, page or UI; redesign, "rapikan", "perbaiki tampilan", modernize, declutter or make it premium/"tidak jadul"; fix layout, spacing, alignment, responsive or overflow issues; standardize buttons, forms, tables, cards, modals; remove native browser/Windows UI (alert/confirm/prompt, validation bubbles); match reference screenshots or a reference URL; or make colors, theme or dark mode settable. Applies even to a single page or component, and even when the request is in Indonesian.
 ---
 
 # Nuansa UI/UX Design
 
-Turn a working-but-messy web UI into one that feels calm, modern and premium — without
-breaking anything. The two goals pull against each other, so the whole skill is about
-holding both at once:
+A design guide for **any** website or web app, whether you're building it new or
+cleaning up an existing one: make it feel calm, modern and premium, clean, tidy and light
+on text, without breaking anything. For an existing site, two goals pull against each
+other, so the skill holds both at once:
 
 1. **Look**: modern, minimalist, clean, simple, professional, consistent, responsive.
 2. **Safety**: every feature, route, form field, handler, permission check and workflow
@@ -60,6 +61,21 @@ those are optional styles. Clean structure with little text is not optional.
   (`references/native-ui.md`).
 
 ## Workflow
+
+**Pick the mode first.**
+- **Redesign / tidy an existing site**: follow Phases 1–5 below as written.
+- **Build a new site or page**: Phase 1 becomes *Define*. Identify the site type in
+  `references/site-types.md` (company profile, landing, e-commerce, blog/docs,
+  portfolio, booking, education, admin, government/forms, auth, utility, mobile web),
+  list the pages it needs and the content you have, and pick a stack (match an existing
+  project; otherwise plain HTML/CSS or the framework the user named). In Phase 2, the
+  "feature inventory" is the list of pages and features to build. Phases 3–5 are the
+  same: tokens → components → layouts → pages → verify.
+- **Not a website** (native app, Figma, slides): the principles and references still
+  apply; the scripts are web-only.
+
+Whatever the mode, read `references/site-types.md` for the type of site in front of
+you: it says which pages, components, text level and preset fit.
 
 Follow these phases in order. Don't jump to restyling before the audit — redesigns that
 skip the audit are the ones that silently delete a form field or break a submit handler.
@@ -274,6 +290,7 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `references/landing-page.md` — product/landing page formula: navbar, hero variants, stat strip, steps, bento features with live mini-demos, pricing/transparency, CTA band, footer, typography/color recipes, Indonesian copywriting. Read for public/marketing pages.
 - `references/mobile-app.md` — safe areas, thumb zone, app bar, bottom nav, sheets, onboarding. Read when mobile/app-like UI is in scope.
 - `references/theming.md` — site-wide / per-user color, dark mode, corner and density switching. Read when colors should be settable.
+- `references/site-types.md` — per site type (company profile, landing, e-commerce, blog/docs, portfolio, booking, education, admin, government/forms, auth, utility, mobile web): core pages, key components, text level, preset, pitfalls, plus pages every site needs. Read first, in both modes.
 - `references/content-clarity.md` — the "less text" rules: text budgets, turning sentences into structure, the 1-1-1 card rule, one screen one job, microcopy lengths, Indonesian before/after rewrites, color as information. Read in Phase 2 and Phase 4.
 - `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
 - `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert, `data-confirm`, automatic inline validation (no browser bubbles), unsaved-changes guard, tooltips.
