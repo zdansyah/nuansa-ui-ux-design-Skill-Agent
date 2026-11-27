@@ -18,20 +18,6 @@ yang sama (HTML identik) bisa tampil dengan wajah yang sama sekali berbeda:
 
 ![Satu halaman empat wajah](docs/screenshots/satu-halaman-empat-wajah.jpg)
 
-## Contoh hasil
-
-Halaman admin berantakan dari `evals/` setelah di-redesign dengan skill ini. Semua fitur
-lama tetap jalan, dan halaman ini lolos semua cek: responsive, aksesibilitas, dan stress test.
-
-| Desktop | Mobile |
-|---|---|
-| ![Contoh admin desktop](docs/screenshots/contoh-admin-desktop.jpg) | ![Contoh admin mobile](docs/screenshots/contoh-admin-mobile.jpg) |
-
-Laporan sebelum/sesudah otomatis dan style guide:
-
-![Laporan sebelum sesudah](docs/screenshots/laporan-sebelum-sesudah.jpg)
-![Komponen style guide](docs/screenshots/styleguide-komponen.jpg)
-
 ## Isi
 
 ```
