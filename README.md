@@ -15,7 +15,7 @@ nuansa-ui-ux-design/
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
 │   ├── components.md            # Button, form, card, table responsif, modal, toast, chip pill, stat, dll.
 │   ├── admin-panel.md           # Layout sidebar/topbar, grup menu, dashboard bento, tabel, filter
-│   ├── style-presets.md         # 6 gaya: Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass
+│   ├── style-presets.md         # 7 gaya: Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel Blocks
 │   ├── layout-system.md         # Logika tata letak rapi: grid, garis sejajar, split header, ritme spacing, anatomi kartu
 │   ├── landing-page.md          # Formula landing page: hero, stat strip, langkah, bento fitur + mini-demo, CTA, copywriting
 │   ├── mobile-app.md            # Bottom nav, app bar, bottom sheet, onboarding, safe area
@@ -28,7 +28,7 @@ nuansa-ui-ux-design/
 ├── scripts/
 │   ├── find_native_dialogs.py   # Cari semua alert/confirm/prompt di project
 │   ├── style_audit.py           # Ukur kekacauan styling (warna, font-size, inline style, !important)
-│   ├── responsive_check.js      # Screenshot 4 ukuran layar + deteksi overflow/tabrakan/teks terpotong/meleset 2–6px
+│   ├── responsive_check.js      # Screenshot 4 ukuran layar + deteksi overflow/tabrakan/teks terpotong/meleset 2–6px/kebanyakan teks
 │   └── extract_design.js        # Pelajari design system web referensi dari URL-nya
 └── evals/                       # Test case (format `claude plugin eval`)
 ```
@@ -48,6 +48,8 @@ web bisa diganti".
 
 ## Fitur utama
 
+- **Prinsip utama: bersih, rapi, tidak kebanyakan teks.** Informasi dipindah dari kalimat ke angka, chip, badge, ikon,
+  dan warna. Jumlah teks diukur otomatis (kata per layar, paragraf, tombol, judul).
 - **Audit dulu, baru ubah**: inventaris fitur dibuat sebelum redesign agar tidak ada yang hilang.
 - **Design tokens**: satu sumber untuk warna, spacing, radius, dan tipografi.
 - **Gaya dari gambar referensi**: ekstrak spec gaya (warna, radius, tipografi, komponen khas) lalu dipetakan ke token.

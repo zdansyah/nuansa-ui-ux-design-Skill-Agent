@@ -13,6 +13,7 @@ token change.
 - Preset 4 — Status Pastel (task/application tracking, utility apps)
 - Preset 5 — Editorial Neutral (product sites, corporate, landing pages)
 - Preset 6 — Soft Glass (fintech, wellness, consumer apps, hero dashboards)
+- Preset 7 — Pastel Blocks (learning, health, lifestyle, booking apps — no glass needed)
 - Learning from a live reference URL
 - Shared "modern" signals across all presets
 - What makes a UI look dated (avoid)
@@ -217,6 +218,49 @@ Signature rules:
   body text on solid or strong glass; limit blur layers (each one costs GPU on low-end
   phones); respect `prefers-reduced-transparency` where supported by falling back to
   `--glass-strong`.
+
+## Preset 7 — Pastel Blocks (reference: learning roadmap app, parking finder, quiz app, yoga/fitness app, mood tracker)
+
+Best for: consumer apps (learning, health, fitness, booking, wellbeing), friendly
+dashboards. The cleanest "colorful" look: flat, no glass, and very little text. Pair
+with `content-clarity.md`; this preset depends on its text budgets.
+
+```css
+:root {
+  --font-sans: "Urbanist", "Outfit", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif; /* geometric, friendly */
+  --color-bg: #f4f5f9;              /* or pure white screens on a light gray canvas */
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef0f5;
+  --color-border: transparent;
+  --color-text: #111111;
+  --color-text-muted: #8a8f98;
+  --color-ink: #111111;             /* primary CTA, active chip, active nav */
+  --color-on-ink: #ffffff;
+  /* category hues: one family (same lightness/saturation) */
+  --cat-1: #a5b4fc; --cat-2: #f9a8d4; --cat-3: #fdba74; --cat-4: #86efac; --cat-5: #93c5fd;
+  --radius-sm: 14px; --radius-md: 24px; --radius-lg: 32px; --radius-control: 9999px;
+}
+.block { border-radius: var(--radius-md); padding: var(--space-5); background: var(--cat, var(--color-surface-muted)); color: var(--color-text); }
+```
+
+Signature rules:
+- **Color-blocked cards by category**: each card is one flat pastel fill (purple course,
+  orange focus, blue balance). Category = color, consistently, which replaces labels.
+- **1-1-1 cards**: icon/visual, title, one meta line, one action (ink circle with an
+  arrow or a "Gabung" pill). Progress as a small ring ("2/3") in the corner.
+- **Ink primary**: black pill CTAs ("Get Started", "Next", "Slide to Park"), black active
+  chip, and an ink bottom-nav bar with the active item as a white circle (or a light
+  pill bar with an ink active circle).
+- **Chip rows** for categories and filters, with icons and count badges ("All 34").
+- **Week strip** (Sun–Sat pills) for date-based apps; selected day = ink.
+- **Big numbers, small units**: "$7.00 / hr", "12:15 pm", "53.3 kg"; stat tiles in pastel.
+- **One question per screen** for onboarding/check-ins: big visual (illustration, 3D
+  object, mascot), short question (≤ 6 words), large answer chips/tiles, segmented
+  progress bar on top, "Skip" text + "Next" pill.
+- **One illustration style** across the app (line doodles, flat vector or 3D, never mixed).
+- Dark screens are allowed for focus moments (onboarding, mood check-in), with the same
+  chips and pills inverted.
+- Circular icon buttons (back, menu, notifications with a dot) in the top bar.
 
 ## Learning from a live reference URL
 

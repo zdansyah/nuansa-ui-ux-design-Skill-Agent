@@ -18,9 +18,18 @@ changes cheap (one token or one component changes, not fifty files).
 
 ## Design principles (the "why" behind every decision)
 
+The one-line test for every decision: **is it clean, tidy, and light on text?**
+("bersih, rapi, tidak kebanyakan teks"). Modern doesn't mean glass, gradients or 3D;
+those are optional styles. Clean structure with little text is not optional.
+
 - **Hierarchy over decoration.** A page should have one obvious primary action and a clear
   reading order. Use size, weight, spacing and color contrast — not borders, gradients,
   shadows and icons everywhere — to show what matters.
+- **Less text, more structure.** Users scan, they don't read. Move information out of
+  sentences into numbers, chips, badges, icons, progress, avatars and color. Cards follow
+  the 1-1-1 rule (one title, one meta line, one action); buttons ≤ 3 words; headings
+  ≤ 8 words; no intro paragraphs on app pages. Details move behind "Lihat detail" or a
+  detail page instead of being deleted. See `references/content-clarity.md`.
 - **Remove, then refine.** Most "jadul" or "ramai" UIs are cluttered, not ugly. Cut
   redundant headings, repeated helper text, decorative dividers, stacked badges, welcome
   banners nobody reads, and duplicate navigation *before* polishing what remains. But
@@ -90,7 +99,7 @@ If the user only asked for one page or component, scope the audit to that, but s
 check whether a shared component or token change is the right fix.
 
 **Choose a style direction.** Read `references/style-presets.md` and pick one preset
-(Clean Pro, Soft Bento, Mono + Accent, Status Pastel) that fits the product and any
+(Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel Blocks) that fits the product and any
 reference images. If the user shared reference images/screenshots, write a short
 "reference style spec" first (colors, radius, type scale, density, signature components)
 as described there, and map it to tokens — borrow the visual language, keep the app's
@@ -156,7 +165,9 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
 2. **Then pages**, one at a time, composing the components. For each page:
    - Establish the page header (title, optional one-line description, primary action).
    - Group related content into sections/cards; align everything to the grid and spacing scale.
-   - Cut clutter (see below), shorten verbose copy, keep one primary CTA per view.
+   - Cut clutter (see below) and apply the text budgets and rewrite patterns in
+     `references/content-clarity.md`: turn sentences into numbers/chips/badges, one
+     primary CTA per view, one job per screen.
    - Replace one-off styles with tokens/components. Remove inline styles you've replaced.
    - Keep every `id`, `name`, `data-*` attribute, form `action`/`method`, event handler,
      route and CSRF token that the code or tests depend on. Changing a class name is fine
@@ -172,18 +183,22 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    (run with `--help` for options). It screenshots each page at mobile (375), tablet
    (768), laptop (1280) and desktop (1440) widths and reports horizontal overflow,
    elements wider than the viewport, overlapping interactive elements, clipped text,
-   small touch targets, and near-miss alignments (edges 2–6px off a shared line). Fix every
+   small touch targets, near-miss alignments (edges 2–6px off a shared line) and the text budget. Fix every
    finding, then re-run until clean. Look at the screenshots yourself — the script
    catches mechanical problems, not ugliness.
-2. **Native UI gone.** Re-run `find_native_dialogs.py --all`; it should report zero
+2. **Text budget.** `responsive_check.js` also reports too much text in the first phone
+   screen, paragraphs over 30 words, button labels over 3 words and headings over 10
+   words (long-form content in `<article>`/`[data-long-text]` is exempt). Rewrite until
+   clean, or justify the exceptions in the report.
+3. **Native UI gone.** Re-run `find_native_dialogs.py --all`; it should report zero
    `alert/confirm/prompt` calls in app code (vendor/minified files are excluded by
    default), and every "other native UI" item should be fixed or deliberately kept. Submit
    each form empty once: you should see inline errors, never a browser bubble.
-3. **Feature regression check.** Walk the feature inventory from Phase 2: every form
+4. **Feature regression check.** Walk the feature inventory from Phase 2: every form
    still submits with the same fields, every button still triggers its action, every
    route still renders, every confirm still guards the destructive action. Run the
    project's test suite and linter/build if they exist.
-4. **Report** to the user: what changed (grouped), where the tokens/components live and
+5. **Report** to the user: what changed (grouped), where the tokens/components live and
    how to re-theme (e.g. "change `--color-primary` in `styles/tokens.css`"), what was
    removed and why, anything you weren't able to verify, and before/after screenshots
    if you captured them.
@@ -254,16 +269,17 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `references/design-tokens.md` — token templates for plain CSS, Tailwind and Bootstrap/Sass, plus dark mode. Read in Phase 3.
 - `references/components.md` — specs and markup patterns for every core component, including responsive tables. Read in Phase 3.
 - `references/admin-panel.md` — admin/dashboard layout, menu grouping, bento dashboards, tables, filters, forms. Read when an admin panel or dashboard is in scope.
-- `references/style-presets.md` — 6 visual directions (Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass) with token overrides, how to extract a style spec from reference images or URLs, dated patterns to avoid. Read in Phase 2.
+- `references/style-presets.md` — 7 visual directions (Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel Blocks) with token overrides, how to extract a style spec from reference images or URLs, dated patterns to avoid. Read in Phase 2.
 - `references/layout-system.md` — the rules behind a tidy layout: grid, alignment lines, split header, spacing rhythm, card anatomy, dashboard grids, numbers, responsive collapse. Read in Phase 4.
 - `references/landing-page.md` — product/landing page formula: navbar, hero variants, stat strip, steps, bento features with live mini-demos, pricing/transparency, CTA band, footer, typography/color recipes, Indonesian copywriting. Read for public/marketing pages.
 - `references/mobile-app.md` — safe areas, thumb zone, app bar, bottom nav, sheets, onboarding. Read when mobile/app-like UI is in scope.
 - `references/theming.md` — site-wide / per-user color, dark mode, corner and density switching. Read when colors should be settable.
+- `references/content-clarity.md` — the "less text" rules: text budgets, turning sentences into structure, the 1-1-1 card rule, one screen one job, microcopy lengths, Indonesian before/after rewrites, color as information. Read in Phase 2 and Phase 4.
 - `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
 - `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert, `data-confirm`, automatic inline validation (no browser bubbles), unsaved-changes guard, tooltips.
 - `assets/ui-controls.css` — restyles native checkbox/radio/switch, select, file input, range, date, number, scrollbars, autofill and focus ring to match the tokens.
 - `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
 - `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls; `--all` also lists beforeunload, window.open, title tooltips and unstyled native controls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
-- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/native-dialog detection.
+- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/native-dialog detection.
 - `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).

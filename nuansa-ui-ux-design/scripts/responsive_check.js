@@ -17,6 +17,7 @@
  *   --cookie <k=v>       Cookie to set (repeatable), e.g. to stay logged in.
  *   --storage <file>     Playwright storageState JSON (logged-in session).
  *   --no-full-page       Viewport-only screenshots.
+ *   --no-text            Report the text budget as info only (for content-heavy pages).
  *
  * Detects, per page and width:
  *   - horizontal page overflow (document wider than viewport) and the elements causing it
@@ -24,6 +25,9 @@
  *   - clipped text (overflow hidden without ellipsis)
  *   - touch targets smaller than 32px on widths <= 480
  *   - near-miss alignment on widths >= 1024 (edges 2–6px off a shared alignment line)
+ *   - text budget: words in the first viewport (> 80 on phones = too wordy; aim ≤ 60), paragraphs over
+ *     30 words, buttons over 3 words, headings over 10 words. Long-form content inside
+ *     <article>, [data-long-text], .prose, tables or code is exempt. Disable with --no-text.
  *   - native alert/confirm/prompt dialogs fired during load (auto-dismissed)
  *   - uncaught page errors
  * Exit code 1 when any issue is found.
@@ -40,7 +44,7 @@ try {
 }
 
 function parseArgs(argv) {
-  const a = { paths: [], widths: [375, 768, 1280, 1440], height: 900, out: 'responsive-report', wait: 500, cookies: [], fullPage: true };
+  const a = { paths: [], widths: [375, 768, 1280, 1440], height: 900, out: 'responsive-report', wait: 500, cookies: [], fullPage: true, text: true };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     const next = () => argv[++i];
@@ -53,6 +57,7 @@ function parseArgs(argv) {
     else if (k === '--cookie') a.cookies.push(next());
     else if (k === '--storage') a.storage = next();
     else if (k === '--no-full-page') a.fullPage = false;
+    else if (k === '--no-text') a.text = false;
     else if (k === '--help' || k === '-h') a.help = true;
   }
   return a;
@@ -191,6 +196,45 @@ function inspect() {
   out.overlaps = out.overlaps.slice(0, 30);
   out.clipped = out.clipped.slice(0, 30);
   out.smallTargets = out.smallTargets.slice(0, 30);
+  // Text budget — clean UIs move information into structure (numbers, chips, icons), not sentences.
+  const exempt = (el) => el.closest('article, [data-long-text], .prose, pre, code, table, [aria-hidden="true"], noscript');
+  const wordsOf = (str) => ((str || '').match(/[\p{L}\p{N}][\p{L}\p{N}'’.,%-]*/gu) || []).length;
+  const text = { firstViewportWords: 0, longParagraphs: [], longButtons: [], longHeadings: [] };
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const p = n.parentElement;
+    if (!p || !n.textContent.trim() || /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(p.tagName) || exempt(p)) continue;
+    const cs = getComputedStyle(p);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) continue;
+    range.selectNodeContents(n);
+    const r = range.getBoundingClientRect();
+    if (r.width < 1 || r.bottom <= 0 || r.top >= window.innerHeight || r.right <= 0 || r.left >= vw) continue;
+    text.firstViewportWords += wordsOf(n.textContent);
+  }
+  for (const el of document.querySelectorAll('p, li, dd, blockquote, figcaption, label, small, div, span')) {
+    if (!visible(el) || exempt(el)) continue;
+    // Containers (div/span) count only their own text, so wrappers aren't flagged for their children.
+    const own = /^(DIV|SPAN)$/.test(el.tagName) ? [...el.childNodes].filter((c) => c.nodeType === 3).map((c) => c.textContent).join(' ') : el.innerText;
+    const w = wordsOf(own);
+    if (w > 30 && !el.querySelector('p, li')) text.longParagraphs.push({ el: describe(el), words: w });
+  }
+  for (const el of document.querySelectorAll('button, [role=button], a.btn, a[class*="button"], input[type=submit], input[type=button]')) {
+    if (!visible(el) || exempt(el)) continue;
+    const label = (el.value || el.innerText || '').trim().replace(/\s+/g, ' ');
+    if (wordsOf(label) > 3 || label.length > 24) text.longButtons.push({ el: describe(el), words: wordsOf(label) });
+  }
+  for (const el of document.querySelectorAll('h1, h2, h3')) {
+    if (!visible(el) || exempt(el)) continue;
+    const w = wordsOf(el.innerText);
+    if (w > 10) text.longHeadings.push({ el: describe(el), words: w });
+  }
+  text.longParagraphs = text.longParagraphs.slice(0, 15);
+  text.longButtons = text.longButtons.slice(0, 15);
+  text.longHeadings = text.longHeadings.slice(0, 10);
+  // Calibrated on well-made sites (≈55–65 words in the first phone screen); dated, wordy screens run 120+.
+  text.viewportBudget = vw <= 480 ? 80 : null;
+  out.text = text;
   return out;
 }
 
@@ -234,7 +278,10 @@ function inspect() {
       const shot = path.join(args.out, `${slug(url)}-${width}.png`);
       await page.screenshot({ path: shot, fullPage: args.fullPage }).catch(() => {});
       const entry = { url, width, status, screenshot: shot, ...result, nativeDialogs: dialogs, pageErrors: errors };
-      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + (result.misaligned || []).length + dialogs.length + errors.length;
+      const t = result.text || { longParagraphs: [], longButtons: [], longHeadings: [] };
+      const overBudget = t.viewportBudget && t.firstViewportWords > t.viewportBudget;
+      const textIssues = args.text ? (overBudget ? 1 : 0) + t.longParagraphs.length + t.longButtons.length + t.longHeadings.length : 0;
+      const count = (result.overflowPx > 0 ? 1 : 0) + result.overlaps.length + result.clipped.length + result.smallTargets.length + (result.misaligned || []).length + textIssues + dialogs.length + errors.length;
       entry.issueCount = count;
       issues += count;
       report.push(entry);
@@ -251,6 +298,12 @@ function inspect() {
       result.smallTargets.slice(0, 8).forEach((o) => console.log(`    small touch target ${o.w}×${o.h}: ${o.el}`));
       (result.misaligned || []).slice(0, 8).forEach((o) => console.log(`    near-miss ${o.edge} edge: ${o.el} at x=${o.x} is ${o.off}px off the x=${o.line} line shared by ${o.lineCount} elements`));
       if (result.alignmentLines) console.log(`    (info) distinct left edges: ${result.alignmentLines} — fewer = tidier`);
+      const tag = args.text ? '' : '(info) ';
+      if (overBudget) console.log(`    ${tag}too much text: ${t.firstViewportWords} words in the first screen (budget ${t.viewportBudget}) — turn sentences into numbers/chips/icons`);
+      else if (t.firstViewportWords) console.log(`    (info) words in first screen: ${t.firstViewportWords}`);
+      t.longParagraphs.slice(0, 6).forEach((o) => console.log(`    ${tag}long paragraph (${o.words} words, budget 30): ${o.el}`));
+      t.longButtons.slice(0, 6).forEach((o) => console.log(`    ${tag}long button label (${o.words} words, budget 3): ${o.el}`));
+      t.longHeadings.slice(0, 6).forEach((o) => console.log(`    ${tag}long heading (${o.words} words, budget 10): ${o.el}`));
       dialogs.forEach((d) => console.log(`    native dialog fired → ${d}`));
       errors.forEach((e) => console.log(`    page error: ${e}`));
     }
