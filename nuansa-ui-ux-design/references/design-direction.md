@@ -36,8 +36,9 @@ Use this file in Phase 2 to create a direction for *this* project before writing
 
 ## Step 1 — Read the project
 
-Answer briefly (infer from the brief, existing brand, content and references; ask only if
-there's nothing to go on):
+Start from the user's answers to the taste questions (`discovery-questions.md`) if they
+gave any. Otherwise answer briefly (infer from the brief, existing brand, content and
+references; ask only if there's nothing to go on):
 1. **Three personality words**: e.g. *hangat, rumahan, jujur* (home bakery); *tegas,
    terpercaya, tenang* (law firm); *cepat, presisi, teknis* (developer tool); *ceria,
    aman, sederhana* (kids education).

@@ -5,6 +5,8 @@
  * from design-tokens.md updates instantly — no rebuild, no per-page CSS.
  *
  *   Theme.apply({ primary: '#d4ff3a' })          // accent; derived tokens are computed
+ *   Theme.apply({ palette: 'tonal' })             // 'solid' | 'pastel' | 'tonal' (senada) | 'duo' (dua warna) | 'mono' (hitam-putih + logo)
+ *   Theme.apply({ palette: 'duo', secondary: '#f97316' })  // second color for highlights/tints (auto-picked if omitted)
  *   Theme.apply({ mode: 'dark' })                 // 'light' | 'dark' | 'system'
  *   Theme.apply({ radius: 'round' })              // 'sharp' | 'soft' | 'round'
  *   Theme.apply({ density: 'compact' })           // 'comfortable' | 'compact'
@@ -99,6 +101,85 @@
     };
   }
 
+  /* ---------- color styles (palette) ---------- */
+  function toHsl(rgb) {
+    var r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, h = 0, s = 0, d = max - min;
+    if (d) {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h *= 60;
+    }
+    return [h, s, l];
+  }
+  function fromHsl(h, s, l) {
+    h = ((h % 360) + 360) % 360 / 360;
+    if (!s) return [l * 255, l * 255, l * 255];
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    function f(t) { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; }
+    return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255];
+  }
+  function pastelOf(rgb, hueShift) { var hsl = toHsl(rgb); return toHex(fromHsl(hsl[0] + (hueShift || 0), Math.min(0.75, Math.max(0.45, hsl[1])), 0.9)); }
+  var TINTS = ['--tint-lime', '--tint-violet', '--tint-orange', '--tint-sky', '--tint-pink', '--tint-mint'];
+
+  // palette: 'solid' | 'pastel' | 'tonal' (senada) | 'duo' (dua warna) | 'mono' (hitam-putih + logo)
+  function paletteVars(dark) {
+    var css = getComputedStyle(root);
+    var pHex = state.primary || css.getPropertyValue('--color-primary').trim();
+    var p = parseHex(pHex);
+    if (!p) return {};
+    var v = derive(toHex(p), dark);
+    var white = [255, 255, 255], ink = [17, 18, 20];
+    var style = state.palette || 'solid';
+    var tints = [];
+    if (style === 'solid') {
+      v['--color-action'] = v['--color-primary'];
+      v['--color-on-action'] = v['--color-on-primary'];
+      tints = [0.84, 0.9, 0.88, 0.93, 0.86, 0.91].map(function (t) { return toHex(mix(p, dark ? ink : white, t)); }); // soft brand tints, so tiles match the brand
+    } else if (style === 'pastel') {
+      v['--color-action'] = v['--color-primary'];
+      v['--color-on-action'] = v['--color-on-primary'];
+      tints = [0, 40, -40, 160, 80, -80].map(function (h) { return pastelOf(p, h); });
+      if (!dark) v['--color-bg'] = toHex(mix(parseHex(pastelOf(p, 0)), white, 0.7));
+    } else if (style === 'tonal') {
+      v['--color-action'] = v['--color-primary'];
+      v['--color-on-action'] = v['--color-on-primary'];
+      tints = [0.86, 0.8, 0.9, 0.74, 0.83, 0.93].map(function (t) { return toHex(mix(p, dark ? ink : white, t)); });
+      if (!dark) {
+        v['--color-bg'] = toHex(mix(p, white, 0.94));
+        v['--color-surface-muted'] = toHex(mix(p, white, 0.9));
+        v['--color-border'] = toHex(mix(p, white, 0.84));
+        v['--color-border-strong'] = toHex(mix(p, white, 0.74));
+      }
+    } else if (style === 'duo') {
+      var s2 = parseHex(state.secondary) || fromHsl(toHsl(p)[0] + 150, Math.max(0.5, toHsl(p)[1]), 0.5);
+      v['--color-action'] = v['--color-primary'];
+      v['--color-on-action'] = v['--color-on-primary'];
+      v['--color-secondary'] = toHex(s2);
+      v['--chart-accent'] = v['--color-primary'];
+      tints = [0.8, 0.86, 0.84, 0.9, 0.82, 0.88].map(function (t, i) { return toHex(mix(i % 2 ? p : s2, dark ? ink : white, t)); });
+    } else if (style === 'mono') {
+      // Black-and-white UI; the brand color lives in the logo and the focus ring only.
+      v['--color-action'] = dark ? '#f4f5f7' : '#111214';
+      v['--color-on-action'] = dark ? '#111214' : '#ffffff';
+      v['--color-primary-soft'] = dark ? 'rgb(255 255 255 / 0.08)' : '#ededee';
+      v['--color-primary-text'] = dark ? '#f4f5f7' : '#111214';
+      v['--chart-accent'] = dark ? '#f4f5f7' : '#111214';
+      tints = dark ? ['#1f2125', '#24262a', '#1c1e22', '#26282c', '#212327', '#1a1c20'] : ['#f1f1f2', '#e9e9eb', '#f4f4f5', '#e4e4e7', '#eeeeef', '#f7f7f8'];
+    }
+    if (dark && (style === 'pastel')) tints = tints.map(function (t) { return 'rgb(' + parseHex(t).join(' ') + ' / 0.16)'; });
+    // Tinted surfaces lower the contrast of muted text: darken it until it reads on the tinted surface.
+    if (!dark && (style === 'tonal' || style === 'pastel')) {
+      var muted = parseHex(css.getPropertyValue('--color-text-muted').trim()) || [106, 111, 120];
+      var surf = parseHex(v['--color-surface-muted'] || css.getPropertyValue('--color-surface-muted').trim()) || white;
+      var bgc = parseHex(v['--color-bg'] || '') || surf;
+      var worst = luminance(surf) < luminance(bgc) ? surf : bgc;
+      v['--color-text-muted'] = toHex(readableOn(muted, 4.6)(worst));
+    }
+    tints.forEach(function (t, i) { v[TINTS[i]] = t; });
+    return v;
+  }
+
   /* ---------- state ---------- */
   var state = load() || {};
   var applied = [];
@@ -120,7 +201,7 @@
     if (state.mode === 'light' || state.mode === 'dark') root.setAttribute('data-theme', state.mode);
     else if (state.mode === 'system') root.setAttribute('data-theme', isDark() ? 'dark' : 'light');
     else root.removeAttribute('data-theme');
-    if (state.primary) Object.assign(vars, derive(state.primary, isDark()));
+    if (state.primary || state.palette || state.secondary) Object.assign(vars, paletteVars(isDark()));
     if (state.radius && RADIUS[state.radius]) Object.assign(vars, RADIUS[state.radius]);
     if (state.density && DENSITY[state.density]) Object.assign(vars, DENSITY[state.density]);
     if (state.font) vars['--font-sans'] = state.font;
@@ -181,7 +262,7 @@
   function mountPicker(container, options) {
     if (!container) return;
     var o = Object.assign({ presets: PRESETS, modes: true, radius: true, density: true, labels: {} }, options || {});
-    var L = Object.assign({ color: 'Warna utama', custom: 'Warna kustom', mode: 'Mode', light: 'Terang', dark: 'Gelap', system: 'Sistem', radius: 'Sudut', sharp: 'Tegas', soft: 'Lembut', round: 'Bulat', density: 'Kepadatan', comfortable: 'Lega', compact: 'Rapat', reset: 'Atur ulang' }, o.labels);
+    var L = Object.assign({ palette: 'Gaya warna', solid: 'Solid', pastel: 'Pastel', tonal: 'Senada', duo: 'Dua warna', mono: 'Hitam-putih', secondary: 'Warna kedua', color: 'Warna utama', custom: 'Warna kustom', mode: 'Mode', light: 'Terang', dark: 'Gelap', system: 'Sistem', radius: 'Sudut', sharp: 'Tegas', soft: 'Lembut', round: 'Bulat', density: 'Kepadatan', comfortable: 'Lega', compact: 'Rapat', reset: 'Atur ulang' }, o.labels);
     container.innerHTML = '';
     container.classList.add('theme-picker');
 
@@ -224,6 +305,30 @@
     swatches.appendChild(customWrap);
     colorGroup.appendChild(swatches);
     container.appendChild(colorGroup);
+
+    if (o.palette !== false) {
+      var palGroup = seg('palette', L.palette, [{ value: 'solid', label: L.solid }, { value: 'pastel', label: L.pastel }, { value: 'tonal', label: L.tonal }, { value: 'duo', label: L.duo }, { value: 'mono', label: L.mono }], state.palette || 'solid');
+      var secWrap = document.createElement('label');
+      secWrap.className = 'tp-secondary';
+      var secInput = document.createElement('input');
+      secInput.type = 'color';
+      secInput.value = state.secondary || '#f97316';
+      secInput.addEventListener('input', function () { apply({ secondary: secInput.value }); });
+      secWrap.appendChild(secInput);
+      secWrap.appendChild(document.createTextNode(' ' + L.secondary));
+      secWrap.hidden = (state.palette || 'solid') !== 'duo';
+      palGroup.appendChild(secWrap);
+      palGroup.querySelector('.tp-seg').classList.add('tp-seg--wrap');
+      // Show the secondary color actually in use (auto-picked when the user hasn't chosen one).
+      var syncSecondary = function () {
+        secWrap.hidden = state.palette !== 'duo';
+        var used = getComputedStyle(root).getPropertyValue('--color-secondary').trim();
+        if (!state.secondary && parseHex(used)) secInput.value = toHex(parseHex(used));
+      };
+      palGroup.addEventListener('click', syncSecondary);
+      syncSecondary();
+      container.appendChild(palGroup);
+    }
 
     if (o.modes) container.appendChild(seg('mode', L.mode, [{ value: 'light', label: L.light }, { value: 'dark', label: L.dark }, { value: 'system', label: L.system }], state.mode || 'light'));
     if (o.radius) container.appendChild(seg('radius', L.radius, [{ value: 'sharp', label: L.sharp }, { value: 'soft', label: L.soft }, { value: 'round', label: L.round }], state.radius || 'soft'));

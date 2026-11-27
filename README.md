@@ -29,6 +29,7 @@ nuansa-ui-ux-design/
 │   ├── states-and-edge-cases.md # Matriks state komponen, empty/error/loading, konten ekstrem
 │   ├── accessibility.md         # WCAG 2.2 AA: cek otomatis + manual 10 menit
 │   ├── performance.md           # Core Web Vitals: LCP, CLS, gambar, font, script
+│   ├── discovery-questions.md   # Pertanyaan selera singkat (bisa dilewati): gaya warna, logo, kesan, referensi
 │   ├── design-direction.md      # Cara menentukan identitas visual unik per web + "sameness check"
 │   ├── data-dashboards.md       # Halaman statistik: kartu KPI, warna delta, grafik, format angka Indonesia
 │   ├── site-types.md            # Panduan per jenis web: halaman, komponen, kadar teks, preset
@@ -53,6 +54,7 @@ nuansa-ui-ux-design/
 │   ├── find_native_dialogs.py   # Cari semua alert/confirm/prompt di project
 │   ├── style_audit.py           # Ukur kekacauan styling (warna, font-size, inline style, !important)
 │   ├── responsive_check.js      # Screenshot 4 ukuran + overflow/tabrakan/meleset/kebanyakan teks + aksesibilitas (axe) + performa + stress test
+│   ├── extract_colors.py        # Ambil palet warna dari logo / gambar referensi
 │   ├── extract_design.js        # Pelajari design system web referensi dari URL-nya
 │   ├── before_after.js          # Laporan sebelum/sesudah untuk klien (screenshot berdampingan + skor)
 │   └── make_styleguide.py       # Halaman style guide otomatis dari token + CSS komponen
@@ -83,8 +85,11 @@ web bisa diganti".
 - **Audit dulu, baru ubah**: inventaris fitur dibuat sebelum redesign agar tidak ada yang hilang.
 - **Design tokens**: satu sumber untuk warna, spacing, radius, dan tipografi.
 - **Gaya dari gambar referensi**: ekstrak spec gaya (warna, radius, tipografi, komponen khas) lalu dipetakan ke token.
-- **Tema bisa diatur**: `Theme.apply({ primary: '#d4ff3a', mode: 'dark', radius: 'round' })`, dengan
-  warna hover/soft/teks yang aman kontras dihitung otomatis.
+- **Sesuai selera user**: sebelum mendesain, AI bertanya singkat soal gaya warna (solid, pastel, senada,
+  dua warna, hitam-putih + logo, gelap), warna logo, kesan, dan contoh web/gambar yang disukai.
+  Semua bisa dilewati, dan AI akan memakai rekomendasi sesuai jenis web.
+- **Custom color selalu ada**: `Theme.apply({ primary: '#d4ff3a', palette: 'tonal', mode: 'dark' })` dan panel
+  "Tampilan" siap pakai. Warna hover, tint, dan teks yang aman kontras dihitung otomatis.
 - **Tanpa tampilan bawaan browser/Windows**: `UI.confirm()` berbasis Promise, `data-confirm` untuk link/form,
   pesan validasi inline otomatis (tanpa balon "Please fill out this field"), modal "Tinggalkan halaman?" untuk form
   yang belum disimpan, tooltip custom, dan kontrol form yang ikut gaya desain. Cek dengan `find_native_dialogs.py --all`.

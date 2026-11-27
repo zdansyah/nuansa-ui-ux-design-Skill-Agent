@@ -33,6 +33,7 @@ Theme dimensions (keep it to these; more knobs = more ways to make it ugly):
 | Dimension | Values | Tokens touched |
 |---|---|---|
 | Accent color | any hex, plus presets | `--color-primary`, `-hover`, `-soft`, `--color-on-primary`, `--color-primary-text`, `--ring` |
+| Color style (`palette`) | solid · pastel · tonal (senada) · duo (dua warna, + `secondary`) · mono (hitam-putih + logo) | `--color-action`, `--tint-*`, `--color-secondary`, and for tonal/pastel the canvas, muted surfaces, borders and muted text (auto-darkened for contrast) |
 | Mode | light / dark / system | `data-theme` on `<html>` → neutral + surface tokens |
 | Corners | sharp / soft / round | `--radius-sm/md/lg`, `--radius-control` |
 | Density | comfortable / compact | `--control-height`, `--control-height-sm`, `--density` |
@@ -66,6 +67,7 @@ For any stack (plain HTML, Blade, Django, PHP, or as a utility inside an SPA):
    <script>Theme.mountPicker(document.getElementById('appearance'));</script>
    ```
    Or wire your own controls: `Theme.apply({ primary: '#16a34a' })`,
+   `Theme.apply({ palette: 'tonal' })`, `Theme.apply({ palette: 'duo', secondary: '#f97316' })`,
    `Theme.apply({ mode: 'dark' })`, `Theme.reset()`.
 5. Custom presets: `Theme.mountPicker(el, { presets: [{ name: 'Brand', primary: '#0f766e' }, …] })`.
    Turn off groups you don't want: `{ density: false, radius: false }`.

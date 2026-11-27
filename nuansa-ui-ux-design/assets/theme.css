@@ -22,3 +22,7 @@
 .tp-seg__btn[aria-checked="true"] { background: var(--color-surface, #fff); color: var(--color-text, #0f172a); box-shadow: var(--shadow-sm, 0 1px 2px rgb(15 23 42 / .06)); }
 .tp-seg__btn:focus-visible { outline: none; box-shadow: var(--ring, 0 0 0 3px rgb(37 99 235 / .35)); }
 .tp-reset { justify-self: start; border: 0; background: none; padding: 0; color: var(--color-text-muted, #64748b); font: inherit; font-size: var(--text-sm, .875rem); text-decoration: underline; cursor: pointer; }
+.tp-secondary { display: inline-flex; align-items: center; gap: var(--space-2, .5rem); margin-top: var(--space-2, .5rem); font-size: var(--text-sm, .875rem); color: var(--color-text-muted, #64748b); cursor: pointer; }
+.tp-secondary input { width: 32px; height: 32px; padding: 0; border: 1px solid var(--color-border-strong, #cbd5e1); border-radius: 50%; background: none; cursor: pointer; }
+.tp-secondary[hidden] { display: none; }
+.tp-seg--wrap { flex-wrap: wrap; overflow: visible; border-radius: 16px; }

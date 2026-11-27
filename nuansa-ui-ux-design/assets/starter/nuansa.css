@@ -135,7 +135,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (min-width: 768px) { .topbar { padding: 0 var(--space-8); } }
 .topbar .search { max-width: 380px; }
 .topbar__end { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
-.avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--tint-violet); color: var(--color-primary-text); font-weight: var(--weight-semibold); font-size: var(--text-sm); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--tint-violet); color: var(--color-text); font-weight: var(--weight-semibold); font-size: var(--text-sm); } /* ink text: readable on any tint a palette produces */
 .content { width: 100%; max-width: 1360px; margin: 0 auto; padding: var(--space-2) var(--space-4) var(--space-16); display: grid; grid-template-columns: minmax(0, 1fr); /* an implicit auto column would grow to the widest content */ gap: var(--gutter); }
 @media (min-width: 768px) { .content { padding: var(--space-2) var(--space-8) var(--space-16); } }
 .hide-desktop { } @media (min-width: 1024px) { .hide-desktop { display: none !important; } }
@@ -329,3 +329,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .grid-main-side { display: grid; gap: var(--gutter); }
 @media (min-width: 1100px) { .grid-main-side { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: stretch; } .grid-main-side > :first-child { grid-column: span 8; } .grid-main-side > :last-child { grid-column: span 4; } }
 .grid-main-side > * { min-width: 0; }
+
+/* ============ Popover (e.g. the "Tampilan" theme picker) ============ */
+.popover-anchor { position: relative; }
+.popover { position: absolute; top: calc(100% + 10px); right: 0; z-index: var(--z-dropdown); width: min(380px, calc(100vw - 32px));
+  padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-lg); border: 1px solid var(--color-border); }
+.popover__title { font-size: var(--text-base); font-weight: var(--weight-semibold); margin-bottom: var(--space-4); }

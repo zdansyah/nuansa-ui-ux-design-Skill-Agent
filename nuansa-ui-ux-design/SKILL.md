@@ -1,6 +1,6 @@
 ---
 name: nuansa-ui-ux-design
-description: Design, redesign and tidy the UI/UX of any website or web app, new or existing (company profiles, landing/SaaS, e-commerce, blogs and docs, portfolios, booking, education, dashboards, admin panels, government forms, mobile web) into a clean, tidy, low-text, modern design that is responsive and easy to re-theme, without breaking features. Use whenever the user wants to build or design a site, page or UI; redesign, "rapikan", "perbaiki tampilan", modernize, declutter or make it premium/"tidak jadul"; fix layout, spacing, alignment, responsive or overflow issues; standardize buttons, forms, tables, cards, modals; remove native browser/Windows UI (alert/confirm/prompt, validation bubbles); match reference screenshots or a reference URL; or make colors, theme or dark mode settable. Applies even to a single page or component, and even when the request is in Indonesian.
+description: Design, redesign and tidy the UI/UX of any website or web app, new or existing (company profiles, landing/SaaS, e-commerce, blogs and docs, portfolios, booking, education, dashboards, admin panels, government forms, mobile web) into a clean, tidy, low-text, modern design that is responsive and easy to re-theme, without breaking features. Use whenever the user wants to build or design a site, page or UI, or shares a logo, screenshot or site they like; redesign, "rapikan", "perbaiki tampilan", modernize, declutter or make it premium/"tidak jadul"; fix layout, spacing, alignment, responsive or overflow issues; standardize buttons, forms, tables, cards, modals; remove native browser/Windows UI (alert/confirm/prompt, validation bubbles); match reference screenshots or a reference URL; or make colors, theme or dark mode settable. Applies even to a single page or component, and even when the request is in Indonesian.
 ---
 
 # Nuansa UI/UX Design
@@ -131,6 +131,17 @@ Produce a short audit (in the conversation, or as `UI-AUDIT.md` if the project i
 If the user only asked for one page or component, scope the audit to that, but still
 check whether a shared component or token change is the right fix.
 
+**Ask about taste first (skippable).** For a new site or a large redesign, read
+`references/discovery-questions.md` and ask a few quick multiple-choice questions in one
+message: color style (solid, pastel, senada/tonal, dua warna, hitam-putih + logo, gelap),
+brand color or logo, personality, and optionally shape, density, references and theming.
+Use a structured question tool when the environment has one. Invite references ("kirim
+link atau gambar yang Anda suka"); extract colors from a logo or screenshot with
+`scripts/extract_colors.py`, and a full design spec from a URL with `extract_design.js`.
+Always offer "lewati, pakai rekomendasi": if the user skips or says "langsung saja", use the
+site-type defaults in that file and state the choice in one line. Ask only what the brief,
+brand and references don't already answer; for small tasks, don't ask.
+
 **Create a design direction for this project.** Read `references/design-direction.md`:
 three personality words, audience, existing brand assets, then choose typeface, color
 strategy, shape language, surfaces, density, imagery, motion and one signature detail.
@@ -196,8 +207,11 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    the real CSS (with a dark toggle if a dark theme exists). Open it: inconsistencies and
    broken dark-mode tokens show up immediately. Ship it (e.g. `/styleguide`) so the team
    reuses components instead of inventing new ones.
-6. **Theming (when wanted).** If the user wants colors to be settable — by an admin for
-   the whole site, or per visitor — follow `references/theming.md`: copy
+6. **Theming (custom color is always possible).** Tokens must allow re-coloring later in
+   every project. If the user wants colors to be settable — by an admin for the whole site
+   or per visitor — follow `references/theming.md`: `theme.js` supports a custom brand color,
+   a color style (`palette`: solid, pastel, tonal/senada, duo/dua warna with a second color,
+   mono/hitam-putih), light/dark/system mode, corners and density, all contrast-checked. Copy
    `assets/theme.js` + `assets/theme.css`, add the head boot snippet, and add an
    "Tampilan / Appearance" settings section. Even if not requested, structure tokens so
    this is possible later, and mention it in the report.
@@ -338,6 +352,7 @@ unchanged Nuansa page, it isn't done.
 
 ## Bundled resources
 
+- `references/discovery-questions.md` — quick, skippable taste questions (color style, brand color/logo, personality, shape, density, references, theming), how to ask, site-type defaults when skipped, color-style recipes, confirming the direction. Read at the start of Phase 2.
 - `references/design-direction.md` — invariants vs variables, deriving a unique visual identity (personality → type, color strategy, shape, surfaces, density, imagery, motion, signature detail), the sameness check, direction examples by business type. Read in Phase 2.
 - `assets/examples/skins.css` — three unrelated identities (editorial, tech, playful) on the same markup; proof and recipe for re-skinning the starter.
 - `assets/starter/nuansa.css` — starter mechanics with one example skin (Nuansa): tokens (light + dark), base, app shell (sidebar drawer, topbar), page header, buttons, chips, cards, stat tiles, badges, responsive table, forms, search, progress, empty state. Hardened against long text and WCAG contrast.
@@ -365,10 +380,11 @@ unchanged Nuansa page, it isn't done.
 - `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
 - `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert, `data-confirm`, automatic inline validation (no browser bubbles), unsaved-changes guard, tooltips.
 - `assets/ui-controls.css` — restyles native checkbox/radio/switch, select, file input, range, date, number, scrollbars, autofill and focus ring to match the tokens.
-- `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
+- `assets/theme.js` + `assets/theme.css` — runtime theme engine: custom brand color with auto-derived hover/soft/contrast-safe text, color styles (solid, pastel, tonal/senada, duo with second color, mono/hitam-putih), light/dark/system, sharp/soft/round, density; ready-made "Tampilan" picker panel (both example pages include it).
 - `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls; `--all` also lists beforeunload, window.open, title tooltips and unstyled native controls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
 - `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/number-format/native-dialog detection, WCAG audit (axe-core, smallest + largest width), performance metrics (`--slow`), and stress test (`--stress`).
 - `scripts/before_after.js` — client-ready before/after report (side-by-side screenshots per page and width, issue counts, notes).
 - `scripts/make_styleguide.py` — living style guide page generated from tokens + component CSS.
+- `scripts/extract_colors.py` — palette from a logo or reference image: dominant colors with shares, suggested primary/secondary/ink/canvas, contrast notes, CSS tokens and a `Theme.apply()` line.
 - `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).
