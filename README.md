@@ -30,6 +30,7 @@ nuansa-ui-ux-design/
 │   ├── accessibility.md         # WCAG 2.2 AA: cek otomatis + manual 10 menit
 │   ├── performance.md           # Core Web Vitals: LCP, CLS, gambar, font, script
 │   ├── design-direction.md      # Cara menentukan identitas visual unik per web + "sameness check"
+│   ├── data-dashboards.md       # Halaman statistik: kartu KPI, warna delta, grafik, format angka Indonesia
 │   ├── site-types.md            # Panduan per jenis web: halaman, komponen, kadar teks, preset
 │   ├── audit-checklist.md       # Checklist audit per halaman + QA akhir
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
@@ -43,8 +44,9 @@ nuansa-ui-ux-design/
 │   └── native-ui.md             # Hilangkan semua tampilan bawaan browser/Windows (popup, balon validasi, kontrol)
 ├── assets/
 │   ├── starter/nuansa.css       # Mekanik siap pakai (layout, komponen, state) + 1 contoh skin; ganti skin per project
-│   ├── examples/                # admin-produk.html (patokan kualitas, ?skin=editorial|tech|playful), skins.css, styleguide.html
+│   ├── examples/                # admin-produk.html & admin-statistik.html (patokan kualitas, ?skin=editorial|tech|playful), skins.css, styleguide.html
 │   ├── ui-feedback.js / .css    # Pengganti semua popup bawaan: alert/confirm/prompt, balon validasi, "Leave site?", tooltip
+│   ├── charts.js                # Grafik bar & area tanpa library: satu data disorot, tooltip, aksesibel
 │   ├── ui-controls.css          # Checkbox, radio, select, file input, scrollbar, autofill ikut design system
 │   └── theme.js / .css          # Engine tema runtime + panel pemilih warna (Theme.apply, Theme.mountPicker)
 ├── scripts/
@@ -75,6 +77,7 @@ web bisa diganti".
 - **Prinsip utama: bersih, rapi, tidak kebanyakan teks.** Informasi dipindah dari kalimat ke angka, chip, badge, ikon,
   dan warna. Jumlah teks diukur otomatis (kata per layar, paragraf, tombol, judul).
 - **UX dulu, baru visual**: tugas utama user, alur dengan jumlah langkah, sitemap, dan evaluasi heuristik Nielsen.
+- **Dashboard & statistik**: kartu KPI dengan pembanding, warna delta sesuai makna, grafik dengan satu data disorot, format angka Indonesia (cek otomatis angka rusak).
 - **Kualitas terukur**: aksesibilitas WCAG 2.2 (axe-core), performa (LCP/CLS/TBT, `--slow`), stress test konten ekstrem (`--stress`).
 - **Siap diserahkan ke klien**: laporan sebelum/sesudah otomatis dan halaman style guide.
 - **Audit dulu, baru ubah**: inventaris fitur dibuat sebelum redesign agar tidak ada yang hilang.

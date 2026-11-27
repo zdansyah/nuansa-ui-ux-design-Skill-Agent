@@ -210,7 +210,11 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    product pages: follow the section formula and hero/feature patterns in
    `references/landing-page.md`. Admin panel:
    read `references/admin-panel.md` for sidebar + topbar layout, menu grouping, page
-   header pattern, data tables, filters and forms. Mobile layouts and app-like UIs
+   header pattern, data tables, filters and forms. Dashboards and statistics pages: read
+   `references/data-dashboards.md` (KPI anatomy, deltas colored by meaning, one
+   highlighted data point per chart, quiet axes, period controls, id-ID number formatting);
+   use the project's chart library styled per its config snippets, or `assets/charts.js`
+   when there is none. Mobile layouts and app-like UIs
    (bottom nav, app bar, sheets, onboarding): read `references/mobile-app.md`.
 2. **Then pages**, one at a time, composing the components. For each page:
    - Establish the page header (title, optional one-line description, primary action).
@@ -239,7 +243,7 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    (768), laptop (1280) and desktop (1440) widths and reports horizontal overflow,
    elements wider than the viewport, overlapping interactive elements, clipped text,
    small touch targets, near-miss alignments (edges 2–6px off a shared line) and the text
-   budget. Once per page it also runs a WCAG 2.2 audit with axe-core (if installed) and a
+   budget, and malformed number formatting. Once per page it also runs a WCAG 2.2 audit with axe-core (if installed) and a
    performance pass (LCP, CLS, blocking time, image and font problems; add `--slow` for a
    mid-range phone on 4G). Add `--stress` to re-check every page with doubled text, long
    unbroken words and huge numbers. Fix every finding, then re-run until clean. Look at the
@@ -338,6 +342,8 @@ unchanged Nuansa page, it isn't done.
 - `assets/examples/skins.css` — three unrelated identities (editorial, tech, playful) on the same markup; proof and recipe for re-skinning the starter.
 - `assets/starter/nuansa.css` — starter mechanics with one example skin (Nuansa): tokens (light + dark), base, app shell (sidebar drawer, topbar), page header, buttons, chips, cards, stat tiles, badges, responsive table, forms, search, progress, empty state. Hardened against long text and WCAG contrast.
 - `assets/examples/admin-produk.html` — reference implementation of the quality bar (add `?skin=editorial|tech|playful` to see other identities): the messy eval admin page redesigned with all features intact, passing every check, including stress and axe.
+- `assets/charts.js` — dependency-free, token-driven SVG bar and area charts (hatched muted bars + one accent, dark tooltip, keyboard/hover, responsive, theme-aware, screen-reader table).
+- `assets/examples/admin-statistik.html` — statistics page reference: KPIs, revenue bars, funnel with stage tabs, top list, channel shares, customers table with progress; passes all checks in all skins.
 - `assets/examples/styleguide.html` — the Nuansa style guide generated with `make_styleguide.py`.
 - `references/audit-checklist.md` — page-by-page audit + final QA checklist. Read in Phase 2 and Phase 5.
 - `references/design-tokens.md` — token templates for plain CSS, Tailwind and Bootstrap/Sass, plus dark mode. Read in Phase 3.
@@ -353,6 +359,7 @@ unchanged Nuansa page, it isn't done.
 - `references/states-and-edge-cases.md` — component state matrix, page/data states, content edge cases, coping rules (clamp, truncate, wrap), optimistic UI and undo, offline. Read in Phase 3–4.
 - `references/accessibility.md` — WCAG 2.2 AA: automated + manual 10-minute pass, contrast, keyboard/focus, semantics, forms, media, motion, touch, axe fixes table. Read in Phase 4–5.
 - `references/performance.md` — Core Web Vitals budgets, measuring, images, fonts, CSS/JS, layout stability, perceived speed. Read in Phase 4–5.
+- `references/data-dashboards.md` — statistics pages: page and KPI anatomy, deltas by meaning, chart choice, highlight-one rule, axes/tooltips, data colors, period controls, top lists/maps, Indonesian number formatting with Intl, responsive and accessible charts, Chart.js/ApexCharts/Recharts styling, mistakes seen in polished shots. Read for any dashboard or report.
 - `references/site-types.md` — per site type (company profile, landing, e-commerce, blog/docs, portfolio, booking, education, admin, government/forms, auth, utility, mobile web): core pages, key components, text level, preset, pitfalls, plus pages every site needs. Read first, in both modes.
 - `references/content-clarity.md` — the "less text" rules: text budgets, turning sentences into structure, the 1-1-1 card rule, one screen one job, microcopy lengths, Indonesian before/after rewrites, color as information. Read in Phase 2 and Phase 4.
 - `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
@@ -361,7 +368,7 @@ unchanged Nuansa page, it isn't done.
 - `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
 - `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls; `--all` also lists beforeunload, window.open, title tooltips and unstyled native controls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
-- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/native-dialog detection, WCAG audit (axe-core), performance metrics (`--slow`), and stress test (`--stress`).
+- `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/text-budget/number-format/native-dialog detection, WCAG audit (axe-core, smallest + largest width), performance metrics (`--slow`), and stress test (`--stress`).
 - `scripts/before_after.js` — client-ready before/after report (side-by-side screenshots per page and width, issue counts, notes).
 - `scripts/make_styleguide.py` — living style guide page generated from tokens + component CSS.
 - `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).

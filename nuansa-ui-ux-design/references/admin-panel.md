@@ -74,6 +74,8 @@ settings, logout). Don't repeat the page title in both topbar and page header �
 
 ## Dashboard (home)
 
+For statistics-heavy dashboards and report pages, follow `data-dashboards.md`.
+
 - Row of 3–4 KPI stat cards: label (muted, sm), value (2xl, semibold, tabular nums),
   optional delta badge. No icons-in-colored-circles unless they carry meaning.
 - Below: 1–2 charts or the most-used list ("Pesanan terbaru") with a "Lihat semua" link.
