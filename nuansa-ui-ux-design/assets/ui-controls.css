@@ -1,0 +1,88 @@
+/* ui-controls.css — make native form controls match the design system instead of the OS/browser look.
+ * Behavior, keyboard support and accessibility stay native; only the appearance changes.
+ * Uses the tokens from design-tokens.md with fallbacks. Opt out per element with .native.
+ */
+:root { accent-color: var(--color-primary, #2563eb); }
+::selection { background: var(--color-primary-soft, #dbeafe); color: var(--color-text, #0f172a); }
+
+/* Checkbox & radio */
+input[type="checkbox"]:not(.native), input[type="radio"]:not(.native) {
+  appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer;
+  width: 18px; height: 18px; display: inline-grid; place-content: center; vertical-align: -3px;
+  border: 1.5px solid var(--color-border-strong, #cbd5e1); background: var(--color-surface, #fff);
+  transition: background var(--duration, 160ms), border-color var(--duration, 160ms), box-shadow var(--duration, 160ms);
+}
+input[type="checkbox"]:not(.native) { border-radius: 5px; }
+input[type="radio"]:not(.native) { border-radius: 50%; }
+input[type="checkbox"]:not(.native)::before {
+  content: ""; width: 10px; height: 10px; transform: scale(0); transition: transform 120ms var(--ease, ease-out);
+  background: var(--color-on-primary, #fff);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+input[type="radio"]:not(.native)::before { content: ""; width: 8px; height: 8px; border-radius: 50%; transform: scale(0); transition: transform 120ms var(--ease, ease-out); background: var(--color-on-primary, #fff); }
+input[type="checkbox"]:not(.native):checked, input[type="radio"]:not(.native):checked,
+input[type="checkbox"]:not(.native):indeterminate { background: var(--color-primary, #2563eb); border-color: var(--color-primary, #2563eb); }
+input[type="checkbox"]:not(.native):checked::before, input[type="radio"]:not(.native):checked::before { transform: scale(1); }
+input[type="checkbox"]:not(.native):indeterminate::before { transform: scale(1); clip-path: none; height: 2px; }
+input[type="checkbox"]:not(.native):focus-visible, input[type="radio"]:not(.native):focus-visible { outline: none; box-shadow: var(--ring, 0 0 0 3px rgb(37 99 235 / .35)); }
+input[type="checkbox"]:not(.native):disabled, input[type="radio"]:not(.native):disabled { opacity: .5; cursor: not-allowed; }
+input[type="checkbox"][role="switch"]:not(.native) { width: 40px; height: 22px; border-radius: 999px; place-content: center start; padding: 2px; background: var(--color-border-strong, #cbd5e1); border: 0; }
+input[type="checkbox"][role="switch"]:not(.native)::before { width: 18px; height: 18px; border-radius: 50%; clip-path: none; transform: none; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: transform var(--duration, 160ms) var(--ease, ease-out); }
+input[type="checkbox"][role="switch"]:not(.native):checked { background: var(--color-primary, #2563eb); }
+input[type="checkbox"][role="switch"]:not(.native):checked::before { transform: translateX(18px); }
+
+/* Select: custom chevron, same box as text inputs */
+select:not(.native):not([multiple]):not([size]) {
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  padding-right: 2.25rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px;
+}
+
+/* File input: styled button instead of the OS "Choose File / No file chosen" */
+input[type="file"]:not(.native) { font: inherit; font-size: var(--text-sm, .875rem); color: var(--color-text-muted, #64748b); max-width: 100%; }
+input[type="file"]:not(.native)::file-selector-button {
+  margin-right: var(--space-3, .75rem); height: var(--control-height-sm, 32px); padding: 0 var(--space-3, .75rem); cursor: pointer;
+  border: 1px solid var(--color-border-strong, #cbd5e1); border-radius: var(--radius-control, 8px);
+  background: var(--color-surface, #fff); color: var(--color-text, #0f172a); font: inherit; font-weight: var(--weight-medium, 500);
+  transition: background var(--duration, 160ms);
+}
+input[type="file"]:not(.native)::file-selector-button:hover { background: var(--color-surface-muted, #f1f5f9); }
+
+/* Range */
+input[type="range"]:not(.native) { accent-color: var(--color-primary, #2563eb); width: 100%; }
+
+/* Date/time: tint the calendar icon, keep the native picker (best on mobile) */
+input[type="date"]:not(.native)::-webkit-calendar-picker-indicator,
+input[type="time"]:not(.native)::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]:not(.native)::-webkit-calendar-picker-indicator { opacity: .55; cursor: pointer; }
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+/* Number: hide spinners (keyboard arrows still work) */
+input[type="number"]:not(.native) { -moz-appearance: textfield; appearance: textfield; }
+input[type="number"]:not(.native)::-webkit-inner-spin-button, input[type="number"]:not(.native)::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Search: remove the WebKit clear "x" (provide your own clear button if needed) */
+input[type="search"]:not(.native)::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/* Details/summary: remove the default triangle, use a chevron */
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+
+/* Scrollbars: thin, neutral (instead of thick grey OS bars inside cards/tables) */
+* { scrollbar-width: thin; scrollbar-color: var(--color-border-strong, #cbd5e1) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--color-border-strong, #cbd5e1); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-subtle, #94a3b8); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Autofill: keep the design colors instead of the browser's yellow/blue fill */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text, #0f172a);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface, #fff) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+/* Native focus outline → consistent ring */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: none; box-shadow: var(--ring, 0 0 0 3px rgb(37 99 235 / .35)); }

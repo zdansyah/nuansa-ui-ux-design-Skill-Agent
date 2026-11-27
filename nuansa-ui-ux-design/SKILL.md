@@ -1,6 +1,6 @@
 ---
 name: nuansa-ui-ux-design
-description: Audit, redesign and tidy the UI/UX of a website or web app (landing pages, dashboards, admin panels, mobile web) into a modern, minimalist, clean, responsive, easily re-themed design while keeping every feature working. Use this skill whenever the user asks to redesign, restyle, "rapikan", "perbaiki tampilan", modernize, declutter, or make a site look premium/professional/not outdated ("tidak jadul"); fix layout, spacing, alignment, responsive/mobile issues, overflow or overlapping elements; clean up an admin panel or dashboard; standardize buttons, forms, tables, cards, modals; replace browser alert()/confirm()/prompt() with custom modals and toasts; make a UI look like reference screenshots, Dribbble shots or a reference website URL; build or tidy a landing/product page; or let the site's colors/theme/dark mode be set from one place ("bisa ganti warna", theme switcher) — even for one page or component, and even when written in Indonesian.
+description: Audit, redesign and tidy the UI/UX of a website or web app (landing pages, dashboards, admin panels, mobile web) into a modern, minimalist, clean, responsive, easily re-themed design while keeping every feature working. Use this skill whenever the user asks to redesign, restyle, "rapikan", "perbaiki tampilan", modernize, declutter, or make a site look premium/professional/not outdated ("tidak jadul"); fix layout, spacing, alignment, responsive/mobile issues, overflow or overlapping elements; clean up an admin panel or dashboard; standardize buttons, forms, tables, cards, modals; remove any native browser/Windows UI (alert/confirm/prompt, validation bubbles, "Leave site?", OS-styled controls); make a UI look like reference screenshots, Dribbble shots or a reference website URL; build or tidy a landing/product page; or let the site's colors/theme/dark mode be set from one place ("bisa ganti warna", theme switcher) — even for one page or component, and even when written in Indonesian.
 ---
 
 # Nuansa UI/UX Design
@@ -43,9 +43,12 @@ changes cheap (one token or one component changes, not fifty files).
 - **Themeable by design.** Because everything runs on tokens, the accent color, dark
   mode, corner style and density can be switched site-wide from one place — offer this
   (see `references/theming.md`) whenever the user wants the site's colors to be settable.
-- **Native browser dialogs are off-limits.** `alert()`, `confirm()` and `prompt()` look
-  broken, block the thread, can't be styled, and are suppressed in some contexts. Replace
-  them with a consistent toast + modal system.
+- **No native browser/OS UI.** `alert()`, `confirm()` and `prompt()` look broken, block
+  the thread, can't be styled, and are suppressed in some contexts. The same goes for
+  "Please fill out this field" bubbles, "Leave site?" dialogs for in-app links, yellow
+  `title` tooltips and OS-styled checkboxes/selects/file inputs. Replace them with one
+  consistent toast + modal + inline-error system and restyled controls
+  (`references/native-ui.md`).
 
 ## Workflow
 
@@ -123,10 +126,13 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    In component frameworks, make these real components with props/variants. In
    server-rendered or plain HTML projects, make them CSS classes (e.g. `.btn`,
    `.btn--primary`) plus partials/includes where the templating supports it.
-4. **Feedback system.** Replace native dialogs. For plain JS/server-rendered projects,
-   copy `assets/ui-feedback.js` and `assets/ui-feedback.css` into the project and wire
-   them in; they provide `UI.toast()`, `UI.confirm()`, `UI.prompt()` and `UI.alert()`
-   that return Promises. In React/Vue/etc., build the equivalent as components
+4. **Feedback system (no native UI).** Read `references/native-ui.md`. For plain
+   JS/server-rendered projects, copy `assets/ui-feedback.js`, `assets/ui-feedback.css` and
+   `assets/ui-controls.css` into the project and wire them in. They provide
+   `UI.toast()`, `UI.confirm()`, `UI.prompt()` and `UI.alert()` (Promise-based),
+   `data-confirm` for links/forms, automatic inline validation messages instead of
+   browser bubbles, `data-unsaved-guard` for forms, `data-tooltip`, and restyled native
+   controls. In React/Vue/etc., build the equivalent as components
    (or use the project's existing UI library's dialog/toast) with the same API shape.
    See "Replacing native dialogs safely" below — this is the most common place to
    introduce bugs.
@@ -169,8 +175,10 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
    small touch targets, and near-miss alignments (edges 2–6px off a shared line). Fix every
    finding, then re-run until clean. Look at the screenshots yourself — the script
    catches mechanical problems, not ugliness.
-2. **Native dialogs gone.** Re-run `find_native_dialogs.py`; it should report zero calls
-   in app code (vendor/minified files are excluded by default).
+2. **Native UI gone.** Re-run `find_native_dialogs.py --all`; it should report zero
+   `alert/confirm/prompt` calls in app code (vendor/minified files are excluded by
+   default), and every "other native UI" item should be fixed or deliberately kept. Submit
+   each form empty once: you should see inline errors, never a browser bubble.
 3. **Feature regression check.** Walk the feature inventory from Phase 2: every form
    still submits with the same fields, every button still triggers its action, every
    route still renders, every confirm still guards the destructive action. Run the
@@ -251,9 +259,11 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - `references/landing-page.md` — product/landing page formula: navbar, hero variants, stat strip, steps, bento features with live mini-demos, pricing/transparency, CTA band, footer, typography/color recipes, Indonesian copywriting. Read for public/marketing pages.
 - `references/mobile-app.md` — safe areas, thumb zone, app bar, bottom nav, sheets, onboarding. Read when mobile/app-like UI is in scope.
 - `references/theming.md` — site-wide / per-user color, dark mode, corner and density switching. Read when colors should be settable.
-- `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert with `data-confirm` support.
+- `references/native-ui.md` — map of every native popup/control to its replacement, setup, validation customization, unsaved-changes guard, what must stay native. Read in Phase 3.
+- `assets/ui-feedback.js` + `assets/ui-feedback.css` — drop-in, dependency-free toast/confirm/prompt/alert, `data-confirm`, automatic inline validation (no browser bubbles), unsaved-changes guard, tooltips.
+- `assets/ui-controls.css` — restyles native checkbox/radio/switch, select, file input, range, date, number, scrollbars, autofill and focus ring to match the tokens.
 - `assets/theme.js` + `assets/theme.css` — runtime theme engine (accent with auto-derived hover/soft/contrast-safe text, light/dark/system, sharp/soft/round, density) and a ready-made picker panel.
-- `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls.
+- `scripts/find_native_dialogs.py` — locate `alert/confirm/prompt` calls; `--all` also lists beforeunload, window.open, title tooltips and unstyled native controls.
 - `scripts/style_audit.py` — measure styling fragmentation (hard-coded colors, font sizes, inline styles, `!important`).
 - `scripts/responsive_check.js` — Playwright screenshots at 4 widths + overflow/overlap/clipping/touch-target/near-miss-alignment/native-dialog detection.
 - `scripts/extract_design.js` — learn a reference site's design system from its URL (screenshots + fonts, type scale, palette, radius, buttons, sections, grid, CSS variables).

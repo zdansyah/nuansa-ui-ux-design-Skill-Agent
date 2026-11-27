@@ -1,5 +1,8 @@
 /*!
- * ui-feedback.js — dependency-free replacement for alert(), confirm() and prompt().
+ * ui-feedback.js — dependency-free replacement for every native browser popup:
+ * alert(), confirm(), prompt(), the "Please fill out this field" validation bubble,
+ * the "Leave site?" dialog for in-app links, and the yellow title tooltip.
+ * Pair with ui-feedback.css (popups) and ui-controls.css (checkbox/select/file/scrollbar).
  *
  *   UI.toast('Data tersimpan', { type: 'success' })
  *   await UI.alert('Sesi Anda berakhir.')
@@ -222,8 +225,10 @@
   document.addEventListener('click', function (e) {
     var node = e.target.closest && e.target.closest('[data-confirm]');
     if (!node || node.tagName === 'FORM') return;
-    if (node[PASS]) { node[PASS] = false; return; }
+    if (node[PASS]) { node[PASS] = false; e.__uifPassed = true; return; }
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // let new-tab clicks through
+    // Submit buttons: show validation errors first; only ask for confirmation once the form is valid.
+    if (node.form && node.type === 'submit' && !node.form.noValidate && !node.formNoValidate && !node.form.checkValidity()) return;
     e.preventDefault();
     e.stopImmediatePropagation();
     confirmFromElement(node).then(function (ok) {
@@ -251,11 +256,166 @@
     });
   }, true);
 
+  /* ---------------- Form validation: inline messages instead of browser bubbles ----------------
+   * Works on every form automatically, with no markup changes: the browser still validates
+   * (required, type=email, minlength, pattern, min/max…) and still blocks the submit, but the
+   * native "Please fill out this field" bubble is suppressed and a styled inline message is
+   * shown under the field instead. Opt out per form/field with data-native-validation.
+   * Custom text per field: data-error-message="…" (or data-error-required / data-error-pattern …).
+   */
+  var V = isId
+    ? { required: 'Wajib diisi.', select: 'Silakan pilih salah satu.', check: 'Centang untuk melanjutkan.', email: 'Format email tidak valid.', url: 'Format URL tidak valid (awali dengan https://).', tooShort: 'Minimal {n} karakter.', tooLong: 'Maksimal {n} karakter.', min: 'Nilai minimal {n}.', max: 'Nilai maksimal {n}.', step: 'Nilai tidak sesuai kelipatan.', pattern: 'Format tidak sesuai.', number: 'Masukkan angka yang valid.', invalid: 'Isian tidak valid.', summary: 'Periksa {n} isian yang ditandai.' }
+    : { required: 'This field is required.', select: 'Please choose an option.', check: 'Please tick this box to continue.', email: 'Enter a valid email address.', url: 'Enter a valid URL (starting with https://).', tooShort: 'Use at least {n} characters.', tooLong: 'Use at most {n} characters.', min: 'Value must be at least {n}.', max: 'Value must be at most {n}.', step: 'Value is not a valid step.', pattern: 'Format does not match.', number: 'Enter a valid number.', invalid: 'This value is not valid.', summary: 'Check the {n} highlighted fields.' };
+
+  function fieldMessage(el) {
+    var v = el.validity, d = el.dataset || {};
+    var pick = function (key, fallback, n) { return (d['error' + key.charAt(0).toUpperCase() + key.slice(1)] || d.errorMessage || fallback).replace('{n}', n); };
+    if (v.valueMissing) return pick('required', el.type === 'checkbox' ? V.check : (el.tagName === 'SELECT' || el.type === 'radio') ? V.select : V.required);
+    if (v.typeMismatch) return pick('type', el.type === 'email' ? V.email : el.type === 'url' ? V.url : V.invalid);
+    if (v.badInput) return pick('type', V.number);
+    if (v.tooShort) return pick('length', V.tooShort, el.minLength);
+    if (v.tooLong) return pick('length', V.tooLong, el.maxLength);
+    if (v.rangeUnderflow) return pick('range', V.min, el.min);
+    if (v.rangeOverflow) return pick('range', V.max, el.max);
+    if (v.stepMismatch) return pick('range', V.step);
+    if (v.patternMismatch) return pick('pattern', el.title || V.pattern);
+    if (v.customError) return el.validationMessage;
+    return d.errorMessage || V.invalid;
+  }
+
+  function errorAnchor(el) {
+    // Put the message after the control's wrapper when it lives in one (input groups, custom selects, radio groups).
+    if (el.type === 'radio' || el.type === 'checkbox') return el.closest('fieldset, [role=radiogroup], .field, label') || el;
+    return el.closest('.input-group, .search, .select-wrap') || el;
+  }
+
+  function showFieldError(el, msg) {
+    var key = el.id || el.name || ('f' + Math.random().toString(36).slice(2, 7));
+    var errId = 'uif-err-' + key.replace(/[^\w-]/g, '_');
+    var err = document.getElementById(errId);
+    if (!err) {
+      err = el.closest('.field') && el.closest('.field').querySelector('.field__error:not([data-uif])');
+      if (!err || err.textContent.trim()) {
+        err = el2('p', 'field__error uif-field-error');
+        err.setAttribute('data-uif', '');
+        var anchor = errorAnchor(el);
+        anchor.insertAdjacentElement('afterend', err);
+      }
+      err.id = errId;
+    }
+    err.textContent = msg;
+    err.hidden = false;
+    el.setAttribute('aria-invalid', 'true');
+    var by = (el.getAttribute('aria-describedby') || '').split(' ').filter(Boolean);
+    if (by.indexOf(errId) === -1) { by.push(errId); el.setAttribute('aria-describedby', by.join(' ')); }
+    var field = el.closest('.field'); if (field) field.classList.add('has-error');
+  }
+
+  function clearFieldError(el) {
+    el.removeAttribute('aria-invalid');
+    var key = el.id || el.name;
+    var err = key && document.getElementById('uif-err-' + key.replace(/[^\w-]/g, '_'));
+    if (err) { err.textContent = ''; err.hidden = true; }
+    var field = el.closest('.field'); if (field) field.classList.remove('has-error');
+  }
+  function el2(tag, cls) { return el(tag, cls); }
+
+  var invalidBatch = [];
+  document.addEventListener('invalid', function (e) {
+    var f = e.target;
+    if (!f || f.closest('[data-native-validation]')) return;
+    e.preventDefault(); // suppresses the browser's validation bubble
+    showFieldError(f, fieldMessage(f));
+    if (invalidBatch.indexOf(f) !== -1) return; // the same field can fire twice (pre-check + browser)
+    invalidBatch.push(f);
+    if (invalidBatch.length === 1) {
+      setTimeout(function () {
+        var first = invalidBatch[0], n = invalidBatch.length;
+        invalidBatch = [];
+        if (first && typeof first.focus === 'function') {
+          first.focus({ preventScroll: true });
+          first.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        }
+        if (n > 1) toast(V.summary.replace('{n}', n), { type: 'error' });
+      }, 0);
+    }
+  }, true);
+
+  function revalidate(e) {
+    var f = e.target;
+    if (!f || !f.willValidate || f.getAttribute('aria-invalid') !== 'true') return;
+    if (f.validity.valid) clearFieldError(f); else showFieldError(f, fieldMessage(f));
+    if (f.type === 'radio' && f.form && f.name) {
+      Array.prototype.forEach.call(f.form.querySelectorAll('input[type=radio][name="' + f.name + '"]'), function (r) { if (r.validity.valid) clearFieldError(r); });
+    }
+  }
+  document.addEventListener('input', revalidate, true);
+  document.addEventListener('change', revalidate, true);
+
+  /* ---------------- Unsaved-changes guard (in-app navigation) ----------------
+   * <form data-unsaved-guard> … </form>
+   * When the form has been edited and the user clicks a link that leaves the page, a styled
+   * UI.confirm appears instead of losing data silently. Closing the tab/reloading can ONLY be
+   * guarded by the browser's own beforeunload dialog (browsers forbid custom UI there), so that
+   * native prompt is used only as a last resort and only while there are unsaved changes.
+   */
+  var dirtyForms = new Set();
+  document.addEventListener('input', function (e) {
+    var form = e.target && e.target.form;
+    if (form && form.hasAttribute('data-unsaved-guard')) dirtyForms.add(form);
+  }, true);
+  document.addEventListener('submit', function (e) { dirtyForms.delete(e.target); }, false);
+  function hasUnsaved() {
+    dirtyForms.forEach(function (f) { if (!f.isConnected) dirtyForms.delete(f); });
+    return dirtyForms.size > 0;
+  }
+  document.addEventListener('click', function (e) {
+    if (!hasUnsaved() || e.defaultPrevented || e.__uifPassed) return; // already confirmed via data-confirm
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download') || a[PASS] || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) === '#' || /^(javascript|mailto|tel):/i.test(href)) return;
+    var inGuarded = false;
+    dirtyForms.forEach(function (f) { if (f.contains(a)) inGuarded = true; });
+    if (inGuarded) return;
+    e.preventDefault();
+    confirmDialog({
+      title: isId ? 'Tinggalkan halaman?' : 'Leave this page?',
+      message: isId ? 'Perubahan yang belum disimpan akan hilang.' : 'Changes you made will be lost.',
+      confirmText: isId ? 'Tinggalkan' : 'Leave', cancelText: isId ? 'Tetap di sini' : 'Stay', variant: 'danger'
+    }).then(function (ok) { if (ok) { dirtyForms.clear(); location.href = a.href; } });
+  }, false);
+  global.addEventListener('beforeunload', function (e) {
+    if (!hasUnsaved()) return;
+    e.preventDefault();
+    e.returnValue = ''; // browser-controlled dialog; text cannot be customized
+  });
+
+  /* ---------------- Tooltips: replace the native yellow title tooltip ----------------
+   * Use data-tooltip="…" on any element (styled in ui-feedback.css), or call
+   * UI.upgradeTooltips() once to convert existing title="" attributes on interactive elements.
+   */
+  function upgradeTooltips(root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll('a[title], button[title], [role=button][title], .icon-btn[title]'), function (n) {
+      var t = n.getAttribute('title');
+      if (!t) return;
+      n.setAttribute('data-tooltip', t);
+      // Icon/emoji-only buttons (no letters or digits) need the tooltip text as their accessible name.
+      if (!/[\p{L}\p{N}]/u.test(n.textContent) && !n.getAttribute('aria-label')) n.setAttribute('aria-label', t);
+      n.removeAttribute('title');
+    });
+  }
+
   global.UI = {
     toast: toast,
     alert: alertDialog,
     confirm: confirmDialog,
     prompt: promptDialog,
+    /** Show inline validation messages for a form now (e.g. before a fetch submit). Returns true when valid. */
+    validate: function (form) { return form.checkValidity(); },
+    /** Mark a guarded form as clean after saving via fetch/AJAX. */
+    markSaved: function (form) { if (form) dirtyForms.delete(form); else dirtyForms.clear(); },
+    upgradeTooltips: upgradeTooltips,
     /** Override default button labels, e.g. UI.setStrings({ confirm: 'Lanjut' }) */
     setStrings: function (s) { Object.assign(strings, s || {}); },
     /** Change toast defaults, e.g. UI.setToastDefaults({ duration: 6000 }) */

@@ -19,9 +19,11 @@ nuansa-ui-ux-design/
 │   ├── layout-system.md         # Logika tata letak rapi: grid, garis sejajar, split header, ritme spacing, anatomi kartu
 │   ├── landing-page.md          # Formula landing page: hero, stat strip, langkah, bento fitur + mini-demo, CTA, copywriting
 │   ├── mobile-app.md            # Bottom nav, app bar, bottom sheet, onboarding, safe area
-│   └── theming.md               # Ganti warna seluruh web dari satu tempat + mode gelap
+│   ├── theming.md               # Ganti warna seluruh web dari satu tempat + mode gelap
+│   └── native-ui.md             # Hilangkan semua tampilan bawaan browser/Windows (popup, balon validasi, kontrol)
 ├── assets/
-│   ├── ui-feedback.js / .css    # Pengganti alert/confirm/prompt: UI.toast, UI.confirm, UI.prompt, data-confirm
+│   ├── ui-feedback.js / .css    # Pengganti semua popup bawaan: alert/confirm/prompt, balon validasi, "Leave site?", tooltip
+│   ├── ui-controls.css          # Checkbox, radio, select, file input, scrollbar, autofill ikut design system
 │   └── theme.js / .css          # Engine tema runtime + panel pemilih warna (Theme.apply, Theme.mountPicker)
 ├── scripts/
 │   ├── find_native_dialogs.py   # Cari semua alert/confirm/prompt di project
@@ -51,7 +53,9 @@ web bisa diganti".
 - **Gaya dari gambar referensi**: ekstrak spec gaya (warna, radius, tipografi, komponen khas) lalu dipetakan ke token.
 - **Tema bisa diatur**: `Theme.apply({ primary: '#d4ff3a', mode: 'dark', radius: 'round' })`, dengan
   warna hover/soft/teks yang aman kontras dihitung otomatis.
-- **Tanpa dialog bawaan browser**: `UI.confirm()` berbasis Promise + atribut `data-confirm` untuk link/form server-side.
+- **Tanpa tampilan bawaan browser/Windows**: `UI.confirm()` berbasis Promise, `data-confirm` untuk link/form,
+  pesan validasi inline otomatis (tanpa balon "Please fill out this field"), modal "Tinggalkan halaman?" untuk form
+  yang belum disimpan, tooltip custom, dan kontrol form yang ikut gaya desain. Cek dengan `find_native_dialogs.py --all`.
 - **Belajar dari web referensi**: `extract_design.js --url https://...` mengukur font, skala tipografi, palet, radius, tombol, urutan section, dan grid.
 - **Tata letak rapi yang terukur**: aturan grid dan garis sejajar, plus deteksi elemen yang meleset 2–6px dari garis sejajarnya.
 - **Verifikasi otomatis**: cek overflow, elemen bertabrakan, teks terpotong, touch target kecil di 375/768/1280/1440px.

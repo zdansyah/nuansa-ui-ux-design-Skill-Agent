@@ -89,3 +89,22 @@ textarea.uif-dialog__input { min-height: 96px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) {
   .uif-toast, .uif-toast.is-leaving, .uif-dialog[open] { animation: none; }
 }
+
+/* ---------- Inline validation (replaces the browser's validation bubble) ---------- */
+.uif-field-error { margin: var(--space-1, .25rem) 0 0; font-size: var(--text-xs, .75rem); line-height: 1.4; color: var(--color-danger, #dc2626); }
+.uif-field-error::before { content: "! "; font-weight: 700; }
+[aria-invalid="true"]:not([type=checkbox]):not([type=radio]) { border-color: var(--color-danger, #dc2626) !important; }
+[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px rgb(220 38 38 / .25) !important; }
+
+/* ---------- Tooltips (replace the native yellow title tooltip) ---------- */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip); position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: var(--z-toast, 1400);
+  transform: translate(-50%, 4px); opacity: 0; pointer-events: none; white-space: nowrap; max-width: 240px;
+  padding: 6px 10px; border-radius: var(--radius-sm, 6px); background: var(--color-ink, #0f172a); color: var(--color-on-ink, #fff);
+  font: 500 12px/1.3 var(--font-sans, system-ui, sans-serif); box-shadow: var(--shadow-md, 0 4px 12px rgb(15 23 42 / .15));
+  transition: opacity var(--duration, 160ms) var(--ease, ease-out), transform var(--duration, 160ms) var(--ease, ease-out);
+}
+[data-tooltip]:hover::after, [data-tooltip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); transition-delay: 300ms; }
+[data-tooltip-pos="bottom"]::after { bottom: auto; top: calc(100% + 8px); }
+@media (hover: none) { [data-tooltip]::after { display: none; } } /* touch: rely on visible labels */
