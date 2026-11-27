@@ -1,13 +1,15 @@
 # Style Presets & Learning From Reference Images
 
-"Modern minimalist" covers several distinct looks. Pick one direction per project and
-apply it consistently — mixing them is what makes a UI feel generic. Each preset below is
+"Modern minimalist" covers several distinct looks. Use them as starting points for a
+project's own direction (`design-direction.md`), adapt them to the brand, and apply the
+result consistently. Mixing several is what makes a UI feel generic; copying one
+unchanged is what makes every site look alike. Each preset below is
 a set of token overrides plus component-shape rules, so switching presets is mostly a
 token change.
 
 ## Contents
 - How to extract a style from reference images
-- Preset 0 — Nuansa (the skill's default; ready-made in assets/starter/nuansa.css)
+- Preset 0 — Nuansa (reference skin for the quality bar; not a default to copy)
 - Preset 1 — Clean Pro (conservative, data-dense admin)
 - Preset 2 — Soft Bento (dashboards, SaaS)
 - Preset 3 — Mono + Accent (bold, Gen-Z, mobile-first; e.g. black + lime)
@@ -47,9 +49,11 @@ signature components (`components.md` → "Modern patterns"), and apply to pages
 user only gives images and an existing app, keep the app's information architecture and
 features; borrow the visual language, not the content.
 
-## Preset 0 — Nuansa (default)
+## Preset 0 — Nuansa (reference skin)
 
-The skill's signature look and the default for any project without a brand system. It
+The skin used by the skill's reference implementation, to show the quality bar. It is
+**not** the default look for new projects; derive each project's identity with
+`design-direction.md` and treat every preset here as a starting point to adapt. It
 combines the strongest shared signals of the reference shots: soft neutral canvas,
 borderless white cards (24px radius), ink pill primary buttons, circular icon buttons,
 one accent (violet by default), pastel tints for stat tiles and categories, big tabular
@@ -66,7 +70,7 @@ Best for: admin panels, internal tools, data-heavy apps, conservative brands.
 - Radius: soft (`6 / 10 / 16`, controls 8px).
 - Type: 14–16px body, page titles 24px/600.
 - Density: comfortable, can go compact in tables.
-- This is what the generic templates in `design-tokens.md` show. Prefer Nuansa unless the brand is conservative or the screens are extremely data-dense.
+- This is what the generic templates in `design-tokens.md` show. Good for conservative brands and very data-dense screens; still adapt type, accent and signature detail to the project.
 
 ## Preset 2 — Soft Bento (reference: project dashboards, income trackers)
 

@@ -1,8 +1,12 @@
-/* nuansa.css — the skill's signature look: soft neutral canvas, borderless white cards,
- * ink pill actions, one accent, pastel tints for categories, big numbers, little text.
- * Tokens + base + layout + components in one file. Pair with ../ui-controls.css,
- * ../ui-feedback.css and ../ui-feedback.js. Re-theme by editing the "Brand" block, or at
- * runtime with ../theme.js. See ../examples/ for complete pages built with it.
+/* nuansa.css — starter MECHANICS + one example SKIN.
+ * Mechanics (keep): app shell with mobile drawer, page header, buttons, chips, cards, stat
+ * tiles, badges, responsive table (stacks on mobile, scrolls on tablet), forms, search,
+ * progress, empty state, [hidden] fix, long-content and contrast hardening.
+ * Skin (replace per project): the token blocks below (fonts, colors, tints, radius,
+ * shadows) and a few accents. Derive the project's own identity with
+ * references/design-direction.md; see ../examples/skins.css for three very different
+ * skins on the same markup. Don't ship this skin unchanged unless the user wants it.
+ * Pair with ../ui-controls.css, ../ui-feedback.css and ../ui-feedback.js.
  */
 
 /* ============ Tokens ============ */

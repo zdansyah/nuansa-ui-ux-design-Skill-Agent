@@ -23,6 +23,9 @@ The one-line test for every decision: **is it clean, tidy, and light on text?**
 ("bersih, rapi, tidak kebanyakan teks"). Modern doesn't mean glass, gradients or 3D;
 those are optional styles. Clean structure with little text is not optional.
 
+- **Same quality bar, own identity.** Rules make a site tidy; the brand and personality
+  make it recognizable. Never ship one house style to every project
+  (`references/design-direction.md`).
 - **Path before pixels.** Know the 3–5 top tasks and make them short (≤ 3 steps where
   possible) before styling anything. A beautiful page on a confusing path still fails.
   See `references/ux-flows.md`.
@@ -128,10 +131,15 @@ Produce a short audit (in the conversation, or as `UI-AUDIT.md` if the project i
 If the user only asked for one page or component, scope the audit to that, but still
 check whether a shared component or token change is the right fix.
 
-**Choose a style direction.** The default is **Nuansa** (see "The default look" below and
-`assets/starter/nuansa.css`). Switch to another preset in `references/style-presets.md`
-(Clean Pro, Soft Bento, Mono + Accent, Status Pastel, Editorial Neutral, Soft Glass, Pastel
-Blocks) only when the product, brand or reference images call for it. If the user shared reference images/screenshots, write a short
+**Create a design direction for this project.** Read `references/design-direction.md`:
+three personality words, audience, existing brand assets, then choose typeface, color
+strategy, shape language, surfaces, density, imagery, motion and one signature detail.
+Presets in `references/style-presets.md` (Clean Pro, Soft Bento, Mono + Accent, Status
+Pastel, Editorial Neutral, Soft Glass, Pastel Blocks) are starting points to adapt, not
+uniforms. Run the **sameness check**: at least 3 dimensions must differ from the Nuansa
+reference skin, unless the user wants that look or the brand already matches. Write the
+direction down (format in the reference) and show it to the user before building when
+the project is new or the change is large. If the user shared reference images/screenshots, write a short
 "reference style spec" first (colors, radius, type scale, density, signature components)
 as described there, and map it to tokens — borrow the visual language, keep the app's
 own features and information architecture. If the user gave **reference URLs**, run
@@ -146,8 +154,10 @@ remove, whether dark mode is wanted. Otherwise pick sensible defaults and state 
 
 ### Phase 3 — Build the foundation (tokens + base + components)
 
-1. **Tokens.** Without an existing design system, start from `assets/starter/nuansa.css`
-   (tokens, base, layout and components in one file). Otherwise read
+1. **Tokens.** Express the design direction as tokens. Without an existing design system
+   you may start from the mechanics in `assets/starter/nuansa.css`, but replace its skin
+   tokens (fonts, colors, radius, surfaces) with the project's direction, as
+   `assets/examples/skins.css` demonstrates. Otherwise read
    `references/design-tokens.md` and create (or consolidate into) a single token source: CSS custom properties, Tailwind theme, or Sass variables, matching the
    stack. Include color (with semantic names like `--color-primary`, `--color-danger`,
    `--color-surface`, `--color-text-muted`), spacing scale, type scale, radius, shadow,
@@ -301,40 +311,33 @@ breaks logic. For each call site from `find_native_dialogs.py`:
 - Keep the same wording intent but make messages specific: "Hapus pengguna *Budi*? Tindakan
   ini tidak bisa dibatalkan." beats "Are you sure?".
 
-## The default look: Nuansa (use unless the project already has a brand or another preset fits better)
+## Quality bar, not a template
 
-Generic "admin template" output (blue buttons, 1px borders everywhere, 6px corners,
-gray tables) is the most common way a redesign ends up looking dated. The skill's default
-is the **Nuansa** look, shipped ready to use in `assets/starter/nuansa.css`:
+The skill fixes **how well** a site is designed, not **what it looks like**. Every project
+gets the same invariants (tidy grid and alignment, little text, clear hierarchy, full
+states, accessibility, responsiveness, no native UI, performance) and its **own visual
+identity** chosen from its brand, audience and personality (`references/design-direction.md`).
 
-- **Canvas & surfaces**: soft neutral canvas (`#f2f3f5`), white **borderless** cards with
-  large radius (24px), hairlines only inside cards (table rows).
-- **Actions**: **ink (near-black) pill buttons** for the primary action; secondary =
-  white pill with a hairline; icon-only actions as circular buttons. One accent color
-  (violet by default) for active states, focus, charts and highlights.
-- **Type**: Plus Jakarta Sans (or system UI), large semibold page titles with tight
-  tracking, small muted labels, **big tabular numbers** for stats.
-- **Color for meaning**: pastel tints (lime, violet, orange, sky, pink, mint) for stat tiles,
-  thumbnails and categories; semantic badges with a dot.
-- **Shapes**: pills for buttons, chips and inputs-with-search; 10/18/24px radius scale.
-- **Text**: very little (see `content-clarity.md`).
-- **Motion**: 150–200ms ease-out; respects `prefers-reduced-motion`.
+**Calibrate the quality bar, then design something of your own.** Look at
+`assets/examples/admin-produk.html`, the messy eval page redesigned with every feature
+intact. It shows the *level*: spacing rhythm, hierarchy, density, states, and how little text
+is enough. Then open the same page with `?skin=editorial`, `?skin=tech` and
+`?skin=playful`: the identical markup and rules wear three unrelated identities. That
+range is the point. Don't reproduce the Nuansa look (cool gray canvas, borderless white
+cards, ink pills, violet accent) unless the user asks for it or the brand already matches.
 
-**Calibrate before you design.** Open `assets/examples/admin-produk.html` (the messy
-eval page, redesigned with every feature intact) and `assets/examples/styleguide.html`, or
-screenshot them, so you know the quality bar. Your output should look at least this clean
-and consistent. If it looks like a default Bootstrap/admin template, it isn't done.
-
-For plain HTML or server-rendered projects without an existing design system, start from
-`nuansa.css` (copy it, then adjust the Brand block). For Tailwind/React/Vue projects, port
-its tokens and component rules into the project's theme and components. When the project
-has a brand, keep the brand color as `--color-primary` (or `--color-action` for colored
-buttons) and keep the rest of the Nuansa system.
+`assets/starter/nuansa.css` is a **starter for mechanics** (app shell with mobile drawer,
+responsive table, form fields, chips, stat tiles, states, long-content and contrast
+hardening) with one example skin. Reuse the mechanics; replace the skin tokens with the
+project's direction. If it looks like a default Bootstrap/admin template, or like an
+unchanged Nuansa page, it isn't done.
 
 ## Bundled resources
 
-- `assets/starter/nuansa.css` — the default Nuansa look: tokens (light + dark), base, app shell (sidebar drawer, topbar), page header, buttons, chips, cards, stat tiles, badges, responsive table, forms, search, progress, empty state. Hardened against long text and WCAG contrast.
-- `assets/examples/admin-produk.html` — reference implementation (quality bar): the messy eval admin page redesigned with all features intact, passing every check, including stress and axe.
+- `references/design-direction.md` — invariants vs variables, deriving a unique visual identity (personality → type, color strategy, shape, surfaces, density, imagery, motion, signature detail), the sameness check, direction examples by business type. Read in Phase 2.
+- `assets/examples/skins.css` — three unrelated identities (editorial, tech, playful) on the same markup; proof and recipe for re-skinning the starter.
+- `assets/starter/nuansa.css` — starter mechanics with one example skin (Nuansa): tokens (light + dark), base, app shell (sidebar drawer, topbar), page header, buttons, chips, cards, stat tiles, badges, responsive table, forms, search, progress, empty state. Hardened against long text and WCAG contrast.
+- `assets/examples/admin-produk.html` — reference implementation of the quality bar (add `?skin=editorial|tech|playful` to see other identities): the messy eval admin page redesigned with all features intact, passing every check, including stress and axe.
 - `assets/examples/styleguide.html` — the Nuansa style guide generated with `make_styleguide.py`.
 - `references/audit-checklist.md` — page-by-page audit + final QA checklist. Read in Phase 2 and Phase 5.
 - `references/design-tokens.md` — token templates for plain CSS, Tailwind and Bootstrap/Sass, plus dark mode. Read in Phase 3.

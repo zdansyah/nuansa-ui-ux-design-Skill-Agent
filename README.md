@@ -9,6 +9,15 @@ diganti temanya**, tanpa merusak fitur yang sudah berjalan.
 portfolio, booking/jasa, kursus online, admin panel/dashboard, layanan publik/formulir,
 halaman login, tool satu fungsi, dan web app mobile/PWA.
 
+## Satu standar kualitas, wajah berbeda untuk tiap web
+
+Skill ini menjaga **logika**: rapi, sejajar, sedikit teks, hierarki jelas, aksesibel,
+responsive. **Tampilannya bebas dan kreatif**, mengikuti brand dan karakter masing-masing
+web. "Nuansa" hanya contoh standar kualitas, bukan template yang ditiru. Buktinya, halaman
+yang sama (HTML identik) bisa tampil dengan wajah yang sama sekali berbeda:
+
+![Satu halaman empat wajah](docs/screenshots/satu-halaman-empat-wajah.jpg)
+
 ## Contoh hasil
 
 Halaman admin berantakan dari `evals/` setelah di-redesign dengan skill ini. Semua fitur
@@ -34,6 +43,7 @@ nuansa-ui-ux-design/
 │   ├── states-and-edge-cases.md # Matriks state komponen, empty/error/loading, konten ekstrem
 │   ├── accessibility.md         # WCAG 2.2 AA: cek otomatis + manual 10 menit
 │   ├── performance.md           # Core Web Vitals: LCP, CLS, gambar, font, script
+│   ├── design-direction.md      # Cara menentukan identitas visual unik per web + "sameness check"
 │   ├── site-types.md            # Panduan per jenis web: halaman, komponen, kadar teks, preset
 │   ├── audit-checklist.md       # Checklist audit per halaman + QA akhir
 │   ├── design-tokens.md         # Template token (CSS vars / Tailwind / Bootstrap) + dark mode
@@ -46,8 +56,8 @@ nuansa-ui-ux-design/
 │   ├── theming.md               # Ganti warna seluruh web dari satu tempat + mode gelap
 │   └── native-ui.md             # Hilangkan semua tampilan bawaan browser/Windows (popup, balon validasi, kontrol)
 ├── assets/
-│   ├── starter/nuansa.css       # Gaya default "Nuansa": token, layout, semua komponen (siap pakai)
-│   ├── examples/                # Contoh jadi: admin-produk.html (patokan kualitas) + styleguide.html
+│   ├── starter/nuansa.css       # Mekanik siap pakai (layout, komponen, state) + 1 contoh skin; ganti skin per project
+│   ├── examples/                # admin-produk.html (patokan kualitas, ?skin=editorial|tech|playful), skins.css, styleguide.html
 │   ├── ui-feedback.js / .css    # Pengganti semua popup bawaan: alert/confirm/prompt, balon validasi, "Leave site?", tooltip
 │   ├── ui-controls.css          # Checkbox, radio, select, file input, scrollbar, autofill ikut design system
 │   └── theme.js / .css          # Engine tema runtime + panel pemilih warna (Theme.apply, Theme.mountPicker)
